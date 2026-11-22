@@ -11,7 +11,14 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    html, body { height: 100%; }
+    /* shared sizes: the LP row and the drawings mosaic use the same grid */
+    :root {
+      --tile: clamp(6.5rem, min(17vw, 25vh), 14rem);   /* one LP square (bigger) */
+      --gap: clamp(0.6rem, 1.6vw, 1.5rem);
+      --cols: 5;
+    }
+
+    html { background: #06122d; }   /* page colour beyond the gradient */
 
     body {
       min-height: 100vh;
@@ -19,12 +26,12 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;   /* content starts near the top */
       gap: 4vh;
-      padding: 6vw;
+      padding: 7vh 6vw 8vh;
       text-align: center;
       /* deep blue, slightly lighter in the middle */
-      background: radial-gradient(ellipse at center, #13306b 0%, #0b1d45 55%, #06122d 100%);
+      background: radial-gradient(ellipse 120% 70% at 50% 30%, #13306b 0%, #0b1d45 55%, #06122d 100%) no-repeat;
       color: #efe7d4;
     }
 
@@ -32,12 +39,18 @@
     .name {
       font-family: "Cinzel", "Trajan Pro", "Times New Roman", serif;
       font-weight: 600;
-      font-size: clamp(3rem, 14vw, 11rem);
+      font-size: clamp(2.25rem, 10.5vw, 8.25rem);   /* a quarter smaller than before */
       line-height: 1;
       letter-spacing: 0.06em;
       color: #efe7d4;            /* ivory / marble */
       white-space: nowrap;
     }
+
+    /* "N", "T" and "k": one shared height, a little below the full capitals.
+       Cinzel draws the lowercase k as a small capital, so it is enlarged
+       until it stands exactly as tall as the N and T. */
+    .name .nt { font-size: 0.92em; }
+    .name .k  { font-size: 1.085em; }
 
     /* the "c": reduced size, on the baseline */
     .name .c {
@@ -81,13 +94,13 @@
     .records {
       display: flex;
       justify-content: center;
-      gap: clamp(0.6rem, 1.6vw, 1.5rem);
+      gap: var(--gap);
       margin-top: 2vh;
       list-style: none;
     }
 
     .records li {
-      width: clamp(5.5rem, min(13vw, 17vh), 11rem);
+      width: var(--tile);
       aspect-ratio: 1 / 1;
       padding: 0.3rem;
       border: 1px solid rgba(239, 231, 212, 0.55);   /* thin ivory frame */
@@ -100,16 +113,42 @@
       object-fit: cover;          /* crops each photo to a square, no stretching */
     }
 
-    /* phones: show the middle 3 photos so they stay big enough to see */
+    /* Drawings: one small strip under the LPs, just a hint.
+       Same total width as the LP row; each drawing keeps its own shape. */
+    .drawings {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: calc(var(--gap) / 2);
+      width: calc(var(--cols) * var(--tile) + (var(--cols) - 1) * var(--gap));
+      --dh: calc((var(--cols) * var(--tile) + (var(--cols) - 1) * var(--gap) - 8 * var(--gap) / 2) / 9.6);
+    }
+
+    .drawings li {
+      height: var(--dh);
+      padding: 2px;
+      border: 1px solid rgba(239, 231, 212, 0.35);   /* fainter frame */
+    }
+
+    .drawings img {
+      display: block;
+      height: 100%;
+      width: auto;
+      opacity: 0.85;               /* a little quieter than the LPs */
+    }
+
+    /* phones: the middle 3 LPs, bigger; drawings wrap into short rows */
     @media (max-width: 600px) {
+      :root { --tile: 27vw; --cols: 3; }
       .records li:first-child,
       .records li:last-child { display: none; }
-      .records li { width: 26vw; }
+      .drawings { --dh: 17vw; }
     }
   </style>
 </head>
 <body>
-  <h1 class="name" aria-label="eNTckidu"><span class="e">e</span>NT<span class="c">c</span>kid<span class="u">u</span></h1>
+  <h1 class="name" aria-label="eNTckidu"><span class="e">e</span><span class="nt">NT</span><span class="c">c</span><span class="k">k</span>id<span class="u">u</span></h1>
   <p class="tagline">(more likely) slowly, but surely is back</p>
   <ul class="records">
         <li><img src="jane-here-we-are.jpg" alt="Jane – Here We Are" width="600" height="600"></li>
@@ -117,6 +156,17 @@
     <li><img src="king-crimson-lizard.jpg" alt="King Crimson – Lizard" width="600" height="600"></li>
     <li><img src="talking-heads-naked.jpg" alt="Talking Heads – Naked" width="600" height="600"></li>
     <li><img src="experimental.jpg" alt="Experimental" width="600" height="600"></li>
+  </ul>
+  <ul class="drawings">
+    <li><img src="drawing-face.jpg" alt="Drawing: portrait of a man"></li>
+    <li class="wide"><img src="drawing-bassist.jpg" alt="Drawing: bass player in sunglasses"></li>
+    <li><img src="drawing-celelalte-cuvinte.jpg" alt="Drawing: Celelalte Cuvinte"></li>
+    <li><img src="drawing-harmonica.jpg" alt="Drawing: musician in profile"></li>
+    <li><img src="drawing-beard.jpg" alt="Drawing: bearded man"></li>
+    <li class="wide"><img src="drawing-pianist.jpg" alt="Drawing: musician at the keys"></li>
+    <li class="wide"><img src="drawing-wild-hair.jpg" alt="Drawing: head with wild hair"></li>
+    <li><img src="drawing-long-hair.jpg" alt="Drawing: long-haired face"></li>
+    <li><img src="drawing-guitar-man.jpg" alt="Drawing: man with guitar"></li>
   </ul>
 </body>
 </html>
