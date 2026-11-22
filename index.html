@@ -7,7 +7,7 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b1d45'/%3E%3Ctext x='32' y='49' text-anchor='middle' font-family='Cormorant Garamond,Garamond,Georgia,serif' font-weight='700' font-size='70' fill='%23efe7d4'%3Ee%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Cormorant+Garamond:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Cormorant+Garamond:wght@500;700&family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -66,17 +66,16 @@
       text-underline-offset: 0.09em;
     }
 
-    /* Lines 2 and 3 */
+    /* Line 2: one line, classical Garamond, sized to always fit the width */
     .tagline {
-      font-family: "Cormorant Garamond", Garamond, "Times New Roman", serif;
-      font-weight: 500;
-      font-size: clamp(1.1rem, min(4.6vh, 6.4vw), 3rem);
-      line-height: 1.35;
+      font-family: "EB Garamond", Garamond, "Times New Roman", serif;
+      font-weight: 400;
+      font-size: clamp(1rem, min(4.4vh, 4.6vw), 2.8rem);
+      line-height: 1.3;
       letter-spacing: 0.02em;
+      white-space: nowrap;
       color: #a8d2f2;            /* light blue */
     }
-
-    .tagline span { display: block; }
 
     /* Row of record photos under the text (static) */
     .records {
@@ -111,10 +110,7 @@
 </head>
 <body>
   <h1 class="name" aria-label="eNTckidu"><span class="e">e</span>NT<span class="c">c</span>kid<span class="u">u</span></h1>
-  <p class="tagline">
-    <span>(more likely) slowly, but surely</span>
-    <span>is back</span>
-  </p>
+  <p class="tagline">(more likely) slowly, but surely is back</p>
   <ul class="records">
         <li><img src="jane-here-we-are.jpg" alt="Jane – Here We Are" width="600" height="600"></li>
     <li><img src="thin-lizzy-chinatown.jpg" alt="Thin Lizzy – Chinatown" width="600" height="600"></li>
