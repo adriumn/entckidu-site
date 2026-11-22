@@ -4,35 +4,85 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>eNTckidu</title>
-  <link href="https://fonts.googleapis.com/css2?family=Caveat+Brush&family=Cormorant+Garamond:wght@600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Cormorant+Garamond:wght@500;700&display=swap" rel="stylesheet">
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
     body {
-      margin: 0; height: 100vh;
-      background: #04103a;
-      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      min-height: 100vh;
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4vh;
+      padding: 6vw;
       text-align: center;
+      /* deep blue, slightly lighter in the middle */
+      background: radial-gradient(ellipse at center, #13306b 0%, #0b1d45 55%, #06122d 100%);
+      color: #efe7d4;
     }
+
+    /* Line 1: the name */
     .name {
-      margin: 0;
-      font-family: "Caveat Brush", cursive; font-weight: normal;
-      font-size: min(22vh, 20vw);
-      text-shadow: 0 0 .15em currentColor;
+      font-family: "Cinzel", "Trajan Pro", "Times New Roman", serif;
+      font-weight: 600;
+      font-size: clamp(3rem, 14vw, 11rem);
+      line-height: 1;
+      letter-spacing: 0.06em;
+      color: #efe7d4;            /* ivory / marble */
+      white-space: nowrap;
     }
-    .pink  { color: #ff2bd6; }
-    .green { color: #39ff14; }
-    .gray  { color: #d5d9e0; }
-    .line {
-      margin: .2em 0 0;
-      font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600;
-      font-size: min(6vh, 6vw);
-      color: #1fd8ff;
-      text-shadow: 0 0 .3em #1fd8ff;
+
+    /* the "c": reduced size, on the baseline */
+    .name .c {
+      font-size: 0.8em;
     }
+
+    /* the "e": a true lowercase e (Cinzel has none, so it comes from
+       Cormorant Garamond Bold), sized to stand exactly as tall as the "c" */
+    .name .e {
+      font-family: "Cormorant Garamond", Garamond, "Times New Roman", serif;
+      font-weight: 700;
+      font-size: 1.24em;
+      letter-spacing: 0.03em;
+    }
+
+    /* the "u": a little smaller and lifted, so the "u" plus its line together
+       fill the same height as the letters beside it. The line is the letter's
+       own underline, raised so it rests exactly on the shared baseline. */
+    .name .u {
+      position: relative;
+      top: -0.145em;             /* = underline offset + thickness */
+      font-size: 0.8em;
+      letter-spacing: 0;         /* keeps the line exactly as wide as the u */
+      text-decoration: underline;
+      text-decoration-thickness: 0.055em;
+      text-underline-offset: 0.09em;
+    }
+
+    /* Lines 2 and 3 */
+    .tagline {
+      font-family: "Cormorant Garamond", Garamond, "Times New Roman", serif;
+      font-weight: 500;
+      font-size: clamp(1.1rem, min(4.6vh, 6.4vw), 3rem);
+      line-height: 1.35;
+      letter-spacing: 0.02em;
+      color: #a8d2f2;            /* light blue */
+    }
+
+    .tagline span { display: block; }
   </style>
 </head>
 <body>
-  <h1 class="name"><span class="pink">e</span><span class="green">NT</span><span class="gray">ck</span><span class="green">i</span><span class="gray">du</span></h1>
-  <p class="line">(more likely) slowly, but surely</p>
-  <p class="line">is back</p>
+  <h1 class="name" aria-label="eNTckidu"><span class="e">e</span>NT<span class="c">c</span>kid<span class="u">u</span></h1>
+  <p class="tagline">
+    <span>(more likely) slowly, but surely</span>
+    <span>is back</span>
+  </p>
 </body>
 </html>
