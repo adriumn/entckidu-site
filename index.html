@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>eNTckidu</title>
-   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b1d45'/%3E%3Ctext x='32' y='49' text-anchor='middle' font-family='Cormorant Garamond,Garamond,Georgia,serif' font-weight='700' font-size='70' fill='%23efe7d4'%3Ee%3C/text%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b1d45'/%3E%3Ctext x='32' y='49' text-anchor='middle' font-family='Cormorant Garamond,Garamond,Georgia,serif' font-weight='700' font-size='70' fill='%23efe7d4'%3Ee%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Cormorant+Garamond:wght@500;700&display=swap" rel="stylesheet">
@@ -77,6 +77,36 @@
     }
 
     .tagline span { display: block; }
+
+    /* Row of record photos under the text (static) */
+    .records {
+      display: flex;
+      justify-content: center;
+      gap: clamp(0.6rem, 1.6vw, 1.5rem);
+      margin-top: 2vh;
+      list-style: none;
+    }
+
+    .records li {
+      width: clamp(5.5rem, min(13vw, 17vh), 11rem);
+      aspect-ratio: 1 / 1;
+      padding: 0.3rem;
+      border: 1px solid rgba(239, 231, 212, 0.55);   /* thin ivory frame */
+    }
+
+    .records img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;          /* crops each photo to a square, no stretching */
+    }
+
+    /* phones: show the middle 3 photos so they stay big enough to see */
+    @media (max-width: 600px) {
+      .records li:first-child,
+      .records li:last-child { display: none; }
+      .records li { width: 26vw; }
+    }
   </style>
 </head>
 <body>
@@ -85,5 +115,12 @@
     <span>(more likely) slowly, but surely</span>
     <span>is back</span>
   </p>
+  <ul class="records">
+    <li><img src="images/jane-here-we-are.jpg" alt="Jane – Here We Are" width="600" height="600"></li>
+    <li><img src="images/thin-lizzy-chinatown.jpg" alt="Thin Lizzy – Chinatown" width="600" height="600"></li>
+    <li><img src="images/king-crimson-lizard.jpg" alt="King Crimson – Lizard" width="600" height="600"></li>
+    <li><img src="images/talking-heads-naked.jpg" alt="Talking Heads – Naked" width="600" height="600"></li>
+    <li><img src="images/experimental.jpg" alt="Experimental" width="600" height="600"></li>
+  </ul>
 </body>
 </html>
