@@ -7,7 +7,7 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b1d45'/%3E%3Ctext x='32' y='49' text-anchor='middle' font-family='Cormorant Garamond,Garamond,Georgia,serif' font-weight='700' font-size='70' fill='%23efe7d4'%3Ee%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Cormorant+Garamond:wght@500;700&family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;800&family=Cormorant+Garamond:wght@500;700&family=EB+Garamond:ital,wght@0,400;0,500;1,600&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -145,6 +145,62 @@
       .records li:last-child { display: none; }
       .drawings { --dh: 17vw; }
     }
+
+    /* records can be clicked to see them big */
+    .records img { cursor: zoom-in; }
+    .records img:focus-visible { outline: 2px solid #a8d2f2; outline-offset: 3px; }
+
+    /* the enlarged view: cover in the middle, artist and album underneath */
+    .zoom {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.4rem;
+      padding: 5vh 6vw;
+      background: rgba(4, 11, 28, 0.94);
+      cursor: zoom-out;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s ease, visibility 0.25s;
+    }
+    .zoom.open { opacity: 1; visibility: visible; }
+
+    .zoom img {
+      display: block;
+      width: min(480px, 86vw, 62vh);   /* photos are 480 px, so they stay sharp */
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      padding: 0.4rem;
+      border: 1px solid rgba(239, 231, 212, 0.55);
+      box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.6);
+      transform: scale(0.94);
+      transition: transform 0.25s ease;
+    }
+    .zoom.open img { transform: scale(1); }
+
+    .zoom .artist {
+      font-family: "Cinzel", "Trajan Pro", "Times New Roman", serif;
+      font-weight: 800;
+      font-size: clamp(1.6rem, 4.4vw, 2.7rem);
+      letter-spacing: 0.08em;
+      line-height: 1.15;
+      color: #fff8e8;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+    }
+    .zoom .album {
+      font-family: "EB Garamond", Garamond, "Times New Roman", serif;
+      font-style: italic;
+      font-weight: 600;
+      font-size: clamp(1.3rem, 3.4vw, 2rem);
+      line-height: 1.25;
+      margin-top: 0.4rem;
+      color: #bfe0f8;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+    }
   </style>
 </head>
 <body>
@@ -241,5 +297,57 @@
     <li><img src="drawing-long-hair.jpg" alt="Drawing: long-haired face"></li>
     <li><img src="drawing-guitar-man.jpg" alt="Drawing: man with guitar"></li>
   </ul>
+
+  <!-- enlarged record: opens when a record is clicked -->
+  <div class="zoom" role="dialog" aria-modal="true" aria-label="Record" aria-hidden="true">
+    <img src="" alt="">
+    <div>
+      <p class="artist"></p>
+      <p class="album"></p>
+    </div>
+  </div>
+  <script>
+  /* Click a record to see it big, with the artist and album underneath.
+     The names come from the records list ("Band – Album").
+     Click anywhere or press Esc to close. */
+  (function () {
+    var zoom = document.querySelector(".zoom");
+    var big = zoom.querySelector("img");
+    var artist = zoom.querySelector(".artist");
+    var album = zoom.querySelector(".album");
+    var opener = null;
+
+    function open(img) {
+      var parts = img.alt.split(" – ");
+      big.src = img.src;
+      big.alt = img.alt;
+      artist.textContent = parts[0];
+      album.textContent = parts.slice(1).join(" – ");   // empty if there is no album name
+      album.style.display = parts.length > 1 ? "" : "none";
+      opener = img;
+      zoom.classList.add("open");
+      zoom.setAttribute("aria-hidden", "false");
+    }
+
+    function close() {
+      zoom.classList.remove("open");
+      zoom.setAttribute("aria-hidden", "true");
+      if (opener) opener.focus();
+    }
+
+    document.querySelectorAll(".records img").forEach(function (img) {
+      img.tabIndex = 0;
+      img.addEventListener("click", function () { open(img); });
+      img.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(img); }
+      });
+    });
+
+    zoom.addEventListener("click", close);
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && zoom.classList.contains("open")) close();
+    });
+  })();
+  </script>
 </body>
 </html>
