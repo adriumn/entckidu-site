@@ -114,7 +114,7 @@
     }
 
     /* Drawings: a strip of sketchbook paper under the LPs, so they read as
-       their own thing and not as more records. Same total width as the LP
+       their own thing and not as more records. A bit narrower than the LP
        row; each drawing keeps its own shape. */
     .drawings {
       list-style: none;
@@ -124,12 +124,14 @@
       gap: calc(var(--gap) / 2);
       margin-top: 3vh;                       /* a little more air after the records */
       padding: calc(var(--gap) * 1.5) calc(var(--gap) * 2.2);
-      width: calc(var(--cols) * var(--tile) + (var(--cols) - 1) * var(--gap));
+      /* a bit narrower than the LP row (90% of its width) */
+      --paper-w: calc(0.9 * (var(--cols) * var(--tile) + (var(--cols) - 1) * var(--gap)));
+      width: var(--paper-w);
       /* warm paper with very faint pencil sketches (images/paper-sketch.svg) */
-      background: #e9e1cf url("images/paper-sketch.svg") center / cover;
+      background: #d8c9a3 url("images/paper-sketch.svg") center / cover;
       box-shadow: 0 0.8rem 2.2rem rgba(0, 0, 0, 0.45);
       /* drawing height: fits all 9 on one line inside the paper's padding */
-      --dh: calc((var(--cols) * var(--tile) + (var(--cols) - 1) * var(--gap) - 4.4 * var(--gap) - 8 * var(--gap) / 2) / 9.6);
+      --dh: calc((var(--paper-w) - 4.4 * var(--gap) - 8 * var(--gap) / 2) / 9.6);
     }
 
     .drawings li {
