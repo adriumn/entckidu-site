@@ -40,16 +40,18 @@ public sealed class MusicBrainzClient
 
     private readonly HttpClient _http;
     private readonly TimeSpan _minGap;
+    private readonly TimeSpan[] _retryDelays;
     private readonly SemaphoreSlim _gate = new(1, 1);
     private DateTime _lastCallUtc = DateTime.MinValue;
 
     // Remembers answers while the Function stays warm. null = "looked up, nothing found".
     private readonly ConcurrentDictionary<string, AlbumDetails?> _cache = new();
 
-    public MusicBrainzClient(HttpClient http, TimeSpan? minGapBetweenCalls = null)
+    public MusicBrainzClient(HttpClient http, TimeSpan? minGapBetweenCalls = null, TimeSpan[]? retryDelays = null)
     {
         _http = http;
         _minGap = minGapBetweenCalls ?? TimeSpan.FromMilliseconds(1100);
+        _retryDelays = retryDelays ?? [TimeSpan.FromSeconds(1.5), TimeSpan.FromSeconds(3)];
     }
 
     /// <summary>Find the album by artist and title. Returns null when nothing matches well.</summary>
@@ -59,8 +61,9 @@ public sealed class MusicBrainzClient
         if (_cache.TryGetValue(key, out var cached)) return cached;
 
         var releaseId = await SearchReleaseAsync(artist, album, ct);
-        var details = releaseId is null ? null : await GetReleaseAsync(releaseId, ct);
-        Remember(key, details);
+        if (releaseId is null) { Remember(key, null); return null; }
+        var (details, complete) = await GetReleaseAsync(releaseId, ct);
+        if (complete) Remember(key, details);
         return details;
     }
 
@@ -70,8 +73,8 @@ public sealed class MusicBrainzClient
         var key = "id:" + releaseId;
         if (_cache.TryGetValue(key, out var cached)) return cached;
 
-        var details = await GetReleaseAsync(releaseId.ToString(), ct);
-        Remember(key, details);
+        var (details, complete) = await GetReleaseAsync(releaseId.ToString(), ct);
+        if (complete) Remember(key, details);
         return details;
     }
 
@@ -92,6 +95,7 @@ public sealed class MusicBrainzClient
             .OfType<JsonObject>()
             .Where(r => Score(r) >= MinScore)
             .OrderByDescending(r => Normalize(Str(r, "title")) == wanted)    // exact title first
+            .ThenByDescending(r => Str(r["release-group"] as JsonObject, "primary-type") == "Album")  // the album, not a single of the title track
             .ThenByDescending(r => Str(r, "status") == "Official")
             .ThenBy(r => Str(r, "date") is { Length: > 0 } d ? d : "9999")  // oldest pressing first
             .FirstOrDefault();
@@ -100,11 +104,14 @@ public sealed class MusicBrainzClient
     }
 
     // Step 2: the full release (tracks, label, year), then the band members.
-    private async Task<AlbumDetails?> GetReleaseAsync(string releaseId, CancellationToken ct)
+    // complete = false when the members lookup failed: the answer is shown but not remembered,
+    // so the next click tries again.
+    private async Task<(AlbumDetails? Details, bool Complete)> GetReleaseAsync(string releaseId, CancellationToken ct)
     {
         var r = await GetJsonAsync(
             $"release/{releaseId}?inc=recordings+labels+release-groups+genres+artist-credits&fmt=json", ct);
-        if (r is null) return null;
+        if (r is null) return (null, true);
+        var complete = true;
 
         var credits = (r["artist-credit"] as JsonArray)?.OfType<JsonObject>().ToList() ?? [];
         var artistName = string.Concat(credits.Select(c => Str(c, "name") + Str(c, "joinphrase")));
@@ -141,6 +148,7 @@ public sealed class MusicBrainzClient
             catch (MusicBrainzUnavailableException)
             {
                 // The album itself is already known; show it without members.
+                complete = false;
             }
         }
 
@@ -149,7 +157,7 @@ public sealed class MusicBrainzClient
         if (genres.Count == 0 && group is not null) genres = ReadGenres(group);
         if (genres.Count == 0) genres = artistGenres;
 
-        return new AlbumDetails(
+        return (new AlbumDetails(
             Id: releaseId,
             Title: Str(r, "title") ?? "",
             Artist: artistName,
@@ -161,7 +169,7 @@ public sealed class MusicBrainzClient
             Genres: genres,
             Members: members,
             Tracks: tracks,
-            MusicBrainzUrl: "https://musicbrainz.org/release/" + releaseId);
+            MusicBrainzUrl: "https://musicbrainz.org/release/" + releaseId), complete);
     }
 
     private static IReadOnlyList<Member> ReadMembers(JsonObject artist)
@@ -212,17 +220,30 @@ public sealed class MusicBrainzClient
             throw new MusicBrainzUnavailableException("Too many lookups waiting.");
         try
         {
-            var wait = _lastCallUtc + _minGap - DateTime.UtcNow;
-            if (wait > TimeSpan.Zero) await Task.Delay(wait, ct);
-            _lastCallUtc = DateTime.UtcNow;
+            // MusicBrainz answers 503 when it is busy or the caller's IP is going too fast.
+            // Azure shares outgoing IPs between many apps, so this happens now and then:
+            // wait a little longer each time and try again before giving up.
+            for (var attempt = 0; ; attempt++)
+            {
+                var wait = _lastCallUtc + _minGap - DateTime.UtcNow;
+                if (wait > TimeSpan.Zero) await Task.Delay(wait, ct);
+                _lastCallUtc = DateTime.UtcNow;
 
-            using var response = await _http.GetAsync(BaseUrl + pathAndQuery, ct);
-            if (response.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.BadRequest) return null;
-            if (!response.IsSuccessStatusCode)
-                throw new MusicBrainzUnavailableException($"MusicBrainz answered {(int)response.StatusCode}.");
+                using var response = await _http.GetAsync(BaseUrl + pathAndQuery, ct);
+                if (response.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.BadRequest) return null;
 
-            var text = await response.Content.ReadAsStringAsync(ct);
-            return JsonNode.Parse(text) as JsonObject;
+                var busy = response.StatusCode is HttpStatusCode.ServiceUnavailable or HttpStatusCode.TooManyRequests;
+                if (busy && attempt < _retryDelays.Length)
+                {
+                    await Task.Delay(_retryDelays[attempt], ct);
+                    continue;
+                }
+                if (!response.IsSuccessStatusCode)
+                    throw new MusicBrainzUnavailableException($"MusicBrainz answered {(int)response.StatusCode}.");
+
+                var text = await response.Content.ReadAsStringAsync(ct);
+                return JsonNode.Parse(text) as JsonObject;
+            }
         }
         catch (HttpRequestException e)
         {
