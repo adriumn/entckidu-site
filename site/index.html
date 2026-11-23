@@ -18,7 +18,7 @@
       --cols: 5;
     }
 
-    html { background: #06122d; }   /* page colour beyond the gradient */
+    html { background: #06122d; }   /* shows only while the wall picture loads */
 
     body {
       min-height: 100vh;
@@ -28,12 +28,63 @@
       align-items: center;
       justify-content: flex-start;   /* content starts near the top */
       gap: 4vh;
-      padding: 7vh 6vw 8vh;
+      padding: calc(3.2rem + 6vh) 6vw 8vh;   /* room for the header bar */
       text-align: center;
-      /* deep blue, slightly lighter in the middle */
-      background: radial-gradient(ellipse 120% 70% at 50% 30%, #13306b 0%, #0b1d45 55%, #06122d 100%) no-repeat;
       color: #efe7d4;
     }
+
+    /* ---- v0.4: the wall - every cover, dimmed, behind everything (images/wall.jpg) ---- */
+    :root { --mt: 104px; }                     /* one cover in the wall */
+    .wall {
+      position: fixed; inset: 0; z-index: -2;
+      background: url("images/wall.jpg") 0 0 / calc(15 * var(--mt)) auto repeat;
+      filter: saturate(0.9) brightness(0.78);
+    }
+    /* blue veil: keeps a little of the old blue and darkens the spot behind the name */
+    .veil {
+      position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background:
+        radial-gradient(ellipse 40% 22% at 50% 24%, rgba(6,18,45,0.8) 0%, rgba(6,18,45,0.4) 65%, rgba(6,18,45,0) 100%),
+        linear-gradient(rgba(11,29,69,0.22), rgba(11,29,69,0.22));
+    }
+    .name { text-shadow: 0 2px 18px rgba(0,0,0,0.85), 0 0 2px rgba(0,0,0,0.6); }
+
+    /* ---- v0.4: header bar ---- */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 5;
+      height: 3.2rem; display: flex; align-items: center; justify-content: center;
+      gap: clamp(1.5rem, 5vw, 4rem);
+      background: #000; border-bottom: 2px solid #5fb36a;      /* thin green line */
+    }
+    .topbar a {
+      font-family: "EB Garamond", Garamond, serif; font-size: 1.4rem; font-weight: 500; letter-spacing: 0.07em;
+      color: #e6dcc4; text-decoration: none; padding: 0.2rem 0.1rem;
+    }
+    .topbar a:hover, .topbar a[aria-current="page"] { color: #fff; }
+    .topbar a[aria-current="page"] { border-bottom: 2px solid #5fb36a; }
+    .version {
+      position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%);
+      font-family: "Cinzel", serif; font-size: 0.95rem; font-weight: 600; letter-spacing: 0.12em; color: #6fc47a;
+    }
+    .version span {
+      margin-left: 0.6rem; font-family: "EB Garamond", serif; font-weight: 400; font-size: 1rem;
+      letter-spacing: 0.04em; color: rgba(239,231,212,0.75);
+    }
+
+    /* ---- v0.4: one cover in the wall lights up, level with the name ---- */
+    ul.records { position: fixed; z-index: 2; margin: 0; display: block; gap: 0; }
+    ul.records li { width: var(--mt); height: var(--mt); padding: 0; border: 0;
+      outline: 2px solid rgba(239,231,212,0.9); outline-offset: 2px;
+      box-shadow: 0 0 2.5rem rgba(168,210,242,0.55), 0 0.8rem 2rem rgba(0,0,0,0.6);
+      transform: scale(1.12); }
+    ul.records .tag {
+      position: absolute; left: 50%; top: calc(100% + 0.6rem); transform: translateX(-50%) scale(0.893);
+      width: calc(var(--mt) * 2.2); text-align: center;
+      font-family: "EB Garamond", serif; font-style: italic; font-size: 0.95rem; line-height: 1.25; color: #bfe0f8;
+      background: rgba(6,18,45,0.82); padding: 0.3rem 0.5rem; border-radius: 0.3rem;
+    }
+    ul.records .tag b { display: block; font-family: "Cinzel", serif; font-style: normal; font-weight: 800;
+      color: #fff8e8; letter-spacing: 0.05em; }
 
     /* Line 1: the name */
     .name {
@@ -122,14 +173,14 @@
       flex-wrap: wrap;
       justify-content: center;
       gap: calc(var(--gap) / 2);
-      margin-top: 3vh;                       /* a little more air after the records */
+      margin-top: 9vh;                       /* air between the name and the drawings */
       /* the paper hugs the drawings: a thin even border all round */
       --row-w: calc(var(--cols) * var(--tile) + (var(--cols) - 1) * var(--gap));
       padding: calc(var(--gap) * 0.6);
       width: fit-content;
       max-width: var(--row-w);
       /* dark yellow-brown drawing paper, faint pencil sketches on top (images/paper-sketch.svg) */
-      background: #b09660 url("images/paper-sketch.svg") center / cover;
+      background: #d9c79c url("images/paper-sketch.svg") center / cover;   /* lighter paper (v0.4) */
       box-shadow: 0 0.8rem 2.2rem rgba(0, 0, 0, 0.45);
       /* drawing height: all 9 on one line, a little inside the LP row */
       --dh: calc((var(--row-w) - 4.4 * var(--gap) - 8 * var(--gap) / 2) / 9.6);
@@ -149,8 +200,7 @@
     /* phones: the middle 3 LPs, bigger; drawings wrap into short rows */
     @media (max-width: 600px) {
       :root { --tile: 27vw; --cols: 3; }
-      .records li:first-child,
-      .records li:last-child { display: none; }
+      ul.records, .version { display: none !important; }
       .drawings { --dh: 17vw; }
     }
 
@@ -250,17 +300,25 @@
   </style>
 </head>
 <body>
+  <div class="wall"></div><div class="veil"></div>
+  <nav class="topbar">
+    <div class="version">v0.4<span>23 Nov 2026</span></div>
+    <a href="/" aria-current="page">music</a>
+    <a href="#">drawings</a>
+    <a href="#">laziness</a>
+  </nav>
   <h1 class="name" aria-label="eNTckidu"><span class="e">e</span><span class="nt">NT</span><span class="c">c</span><span class="k">k</span>id<span class="u">u</span></h1>
-  <p class="tagline">music, drawings, laziness.</p>
   <ul class="records">
-        <li><img src="images/records/jane-here-we-are.jpg" alt="Jane – Here We Are" width="600" height="600"></li>
-    <li><img src="images/records/thin-lizzy-chinatown.jpg" alt="Thin Lizzy – Chinatown" width="600" height="600"></li>
-    <li><img src="images/records/king-crimson-lizard.jpg" alt="King Crimson – Lizard" width="600" height="600"></li>
-    <li><img src="images/records/talking-heads-naked.jpg" alt="Talking Heads – Naked" width="600" height="600"></li>
-    <li><img src="images/records/experimental.jpg" alt="Experimental" width="600" height="600"></li>
+    <li><img src="" alt="" width="480" height="480"></li>
   </ul>
+  <script src="images/wall.js"></script>
   <script>
-  /* Shows a random 5 of the records on every visit or refresh.
+  /* FEATURED: the cover that lights up next to the name.
+     Put a file name from the list below, or "" to pick one at random. */
+  var FEATURED = "lp-kenny-rogers-moonlight.jpg";
+
+  /* The records list. To add a record: put its photo in images/records/,
+     add a line below, then rebuild the wall: python tools/make-wall.py
      To add a record: put its photo in images/records/ and add a line below:
        ["file.jpg", "Band – Album"]
      Optional third value: the MusicBrainz release ID, when the automatic
@@ -343,32 +401,180 @@
     ["cd-beggars-opera-waters-of-change.jpg", "Beggars Opera – Waters of Change"],
     ["lp-kiss-unmasked.jpg", "KISS – Unmasked"],
     ["lp-black-sabbath-heaven-and-hell.jpg", "Black Sabbath – Heaven and Hell"],
-    ["lp-kevin-ayers-joy-of-a-toy.jpg", "Kevin Ayers – Joy of a Toy"]
+    ["lp-kevin-ayers-joy-of-a-toy.jpg", "Kevin Ayers – Joy of a Toy"],
+    ["lp-eroc.jpg", "Eroc – Eroc"],
+    ["lp-mahogany-rush-world-anthem.jpg", "Frank Marino & Mahogany Rush – World Anthem"],
+    ["lp-pink-floyd-dark-side-of-the-moon.jpg", "Pink Floyd – The Dark Side of the Moon"],
+    ["lp-moebius-plank-rastakraut-pasta.jpg", "Moebius & Plank – Rastakraut Pasta"],
+    ["lp-roy-harper-valentine.jpg", "Roy Harper – Valentine"],
+    ["lp-spirit-dr-sardonicus.jpg", "Spirit – Twelve Dreams of Dr. Sardonicus"],
+    ["lp-kiss-music-from-the-elder.jpg", "KISS – Music from The Elder"],
+    ["lp-gentle-giant-acquiring-the-taste.jpg", "Gentle Giant – Acquiring the Taste"],
+    ["lp-tracy-chapman-crossroads.jpg", "Tracy Chapman – Crossroads"],
+    ["lp-amon-duul-ii-yeti.jpg", "Amon Düül II – Yeti"],
+    ["lp-uriah-heep-live-in-europe-1979.jpg", "Uriah Heep – Live in Europe 1979"],
+    ["lp-amon-duul-ii-phallus-dei.jpg", "Amon Düül II – Phallus Dei"],
+    ["lp-jethro-tull-rokflote.jpg", "Jethro Tull – RökFlöte"],
+    ["cd-jethro-tull-benefit.jpg", "Jethro Tull – Benefit"],
+    ["lp-katapult.jpg", "Katapult"],
+    ["cd-whitesnake-ready-an-willing.jpg", "Whitesnake – Ready an' Willing"],
+    ["lp-gong-gazeuse.jpg", "Gong – Gazeuse!"],
+    ["cd-dust-hard-attack.jpg", "Dust – Hard Attack"],
+    ["cd-matching-mole-little-red-record.jpg", "Matching Mole – Little Red Record"],
+    ["cd-return-to-forever-romantic-warrior.jpg", "Return to Forever – Romantic Warrior"],
+    ["lp-kevin-ayers-sweet-deceiver.jpg", "Kevin Ayers – Sweet Deceiver"],
+    ["lp-patrick-moraz-i.jpg", "Patrick Moraz – i"],
+    ["lp-van-der-graaf-h-to-he.jpg", "Van der Graaf Generator – H to He, Who Am the Only One"],
+    ["lp-patrick-moraz-syrinx-coexistence.jpg", "Patrick Moraz & Syrinx – Coexistence"],
+    ["lp-solaris-marsbeli-kronikak.jpg", "Solaris – Marsbéli krónikák"],
+    ["cd-supersister-present-from-nancy.jpg", "Supersister – Present from Nancy"],
+    ["lp-gang-of-four-solid-gold.jpg", "Gang of Four – Solid Gold"],
+    ["lp-slowdive-souvlaki.jpg", "Slowdive – Souvlaki"],
+    ["lp-valeriu-sterian-vino-doamne.jpg", "Valeriu Sterian și Compania de Sunet – Vino, Doamne!"],
+    ["cd-flasket-brinner-flasket.jpg", "Fläsket Brinner – Fläsket"],
+    ["cd-aigues-vives-water-of-seasons.jpg", "Aigues Vives – Water of Seasons"],
+    ["cd-kaipa-inget-nytt-under-solen.jpg", "Kaipa – Inget nytt under solen"],
+    ["lp-iron-butterfly-in-a-gadda-da-vida.jpg", "Iron Butterfly – In-A-Gadda-Da-Vida"],
+    ["lp-joe-walsh-but-seriously-folks.jpg", "Joe Walsh – But Seriously, Folks..."],
+    ["lp-miles-davis-seven-steps-to-heaven.jpg", "Miles Davis – Seven Steps to Heaven"],
+    ["lp-rainbow-rising.jpg", "Rainbow – Rising"],
+    ["lp-enid-summer-stars.jpg", "The Enid – In the Region of the Summer Stars"],
+    ["lp-foreigner.jpg", "Foreigner – Foreigner"],
+    ["lp-focus-hamburger-concerto.jpg", "Focus – Hamburger Concerto"],
+    ["lp-wilde-flowers.jpg", "The Wilde Flowers – The Wilde Flowers"],
+    ["cd-thirsty-moon.jpg", "Thirsty Moon – Thirsty Moon"],
+    ["lp-epitaph-handicap.jpg", "Epitaph – Handicap"],
+    ["lp-univers-zero-phosphorescent-dreams.jpg", "Univers Zero – Phosphorescent Dreams"],
+    ["lp-paul-mccartney-mccartney.jpg", "Paul McCartney – McCartney"],
+    ["lp-elo-eldorado.jpg", "Electric Light Orchestra – Eldorado"],
+    ["lp-twisted-sister-love-is-for-suckers.jpg", "Twisted Sister – Love Is for Suckers"],
+    ["lp-coryell-mouzon-back-together-again.jpg", "Coryell/Mouzon – Back Together Again"],
+    ["lp-pink-floyd-wish-you-were-here.jpg", "Pink Floyd – Wish You Were Here"],
+    ["lp-philip-lynott-album.jpg", "Philip Lynott – The Philip Lynott Album"],
+    ["lp-phil-manzanera-diamond-head.jpg", "Phil Manzanera – Diamond Head"],
+    ["lp-pierre-moerlens-gong-downwind.jpg", "Pierre Moerlen's Gong – Downwind"],
+    ["lp-ozric-tentacles-jurassic-shift.jpg", "Ozric Tentacles – Jurassic Shift"],
+    ["lp-acdc-who-made-who.jpg", "AC/DC – Who Made Who"],
+    ["lp-uriah-heep-best-of.jpg", "Uriah Heep – The Best of Uriah Heep"],
+    ["lp-brave-new-world-impressions.jpg", "Brave New World – Impressions on Reading Aldous Huxley"],
+    ["lp-agitation-free-2nd.jpg", "Agitation Free – 2nd"],
+    ["cd-ornithos-la-trasfigurazione.jpg", "Ornithos – La Trasfigurazione"],
+    ["cd-kaipa-inget-nytt-under-solen-2.jpg", "Kaipa – Inget nytt under solen"],
+    ["cd-penguin-cafe-orchestra.jpg", "Penguin Cafe Orchestra – Penguin Cafe Orchestra"],
+    ["cd-wyatt-atzmon-stephen-ghosts-within.jpg", "Wyatt, Atzmon, Stephen – ...for the ghosts within"],
+    ["cd-logos-lenigma-della-vita.jpg", "Logos – L'enigma della vita"],
+    ["cd-samla-mammas-manna-maltid.jpg", "Samla Mammas Manna – Måltid"],
+    ["cd-tim-blake-crystal-machine.jpg", "Tim Blake – Crystal Machine"],
+    ["cd-phil-manzanera-vozero.jpg", "Phil Manzanera – Vozero"],
+    ["cd-overkill-years-of-decay.jpg", "Overkill – The Years of Decay"],
+    ["cd-thin-lizzy-fighting.jpg", "Thin Lizzy – Fighting"],
+    ["cd-thin-lizzy-shades-of-a-blue-orphanage.jpg", "Thin Lizzy – Shades of a Blue Orphanage"],
+    ["lp-manuel-gottsching-e2-e4.jpg", "Manuel Göttsching – E2-E4"],
+    ["lp-audience-friends-friends-friend.jpg", "Audience – Friend's Friend's Friend"],
+    ["lp-nucleus-elastic-rock.jpg", "Nucleus – Elastic Rock"],
+    ["lp-always-august.jpg", "Always August – Always August"],
+    ["lp-jon-and-vangelis-friends-of-mr-cairo.jpg", "Jon and Vangelis – The Friends of Mr Cairo"],
+    ["lp-paul-linda-mccartney-ram.jpg", "Paul & Linda McCartney – Ram"],
+    ["lp-novalis.jpg", "Novalis – Novalis"],
+    ["lp-elp-brain-salad-surgery.jpg", "Emerson, Lake & Palmer – Brain Salad Surgery"],
+    ["lp-kevin-coyne-politicz.jpg", "Kevin Coyne – Politicz"],
+    ["lp-soft-machine-seven.jpg", "Soft Machine – Seven"],
+    ["lp-cmu-open-spaces.jpg", "CMU – Open Spaces"],
+    ["lp-lso-ian-anderson-a-classic-case.jpg", "The London Symphony Orchestra & Ian Anderson – A Classic Case"],
+    ["lp-jethro-tull-zealot-gene.jpg", "Jethro Tull – The Zealot Gene"],
+    ["cd-spooky-tooth-the-mirror.jpg", "Spooky Tooth – The Mirror"],
+    ["lp-canned-heat-future-blues.jpg", "Canned Heat – Future Blues"],
+    ["lp-harvey-mandel-the-snake.jpg", "Harvey Mandel – The Snake"],
+    ["lp-third-ear-band-the-magus.jpg", "Third Ear Band – The Magus"],
+    ["lp-balkan-taksim-disko-telegraf.jpg", "Balkan Taksim – Disko Telegraf"],
+    ["cd-captain-beefheart-safe-as-milk.jpg", "Captain Beefheart and His Magic Band – Safe as Milk"],
+    ["cd-kansas-leftoverture.jpg", "Kansas – Leftoverture"],
+    ["cd-potemkine-triton.jpg", "Potemkine – Triton"],
+    ["cd-steely-dan-pretzel-logic.jpg", "Steely Dan – Pretzel Logic"],
+    ["lp-sarmalele-reci-tara-te-vrea-prost.jpg", "Sarmalele Reci – Țara te vrea prost"],
+    ["lp-cinderella-long-cold-winter.jpg", "Cinderella – Long Cold Winter"],
+    ["cd-ozzy-no-rest-for-the-wicked.jpg", "Ozzy Osbourne – No Rest for the Wicked"],
+    ["cd-ozzy-ozzmosis.jpg", "Ozzy Osbourne – Ozzmosis"],
+    ["lp-ozzy-no-more-tears.jpg", "Ozzy Osbourne – No More Tears"],
+    ["lp-go-betweens-liberty-belle.jpg", "The Go-Betweens – Liberty Belle and the Black Diamond Express"],
+    ["lp-traveling-wilburys-vol-1.jpg", "Traveling Wilburys – Vol. 1"],
+    ["lp-beatles-abbey-road.jpg", "The Beatles – Abbey Road"],
+    ["cd-jack-bruce-robin-trower-seven-moons.jpg", "Jack Bruce & Robin Trower – Seven Moons"],
+    ["lp-gentle-giant.jpg", "Gentle Giant – Gentle Giant"],
+    ["cd-rush-2112.jpg", "Rush – 2112"],
+    ["cd-rush-caress-of-steel.jpg", "Rush – Caress of Steel"],
+    ["cd-strawbs-from-the-witchwood.jpg", "Strawbs – From the Witchwood"],
+    ["lp-strawbs-hero-and-heroine.jpg", "Strawbs – Hero and Heroine"],
+    ["lp-acdc-74-jailbreak.jpg", "AC/DC – '74 Jailbreak"],
+    ["lp-gong-est-mort-vive-gong.jpg", "Gong – Gong est mort, vive Gong"],
+    ["lp-joni-mitchell-don-juans-reckless-daughter.jpg", "Joni Mitchell – Don Juan's Reckless Daughter"],
+    ["lp-pro-musica.jpg", "Pró Musica"],
+    ["lp-agitation-free-malesch.jpg", "Agitation Free – Malesch"],
+    ["cd-clarke-di-meola-ponty-rite-of-strings.jpg", "Stanley Clarke, Al Di Meola, Jean-Luc Ponty – The Rite of Strings"],
+    ["cd-jumbo.jpg", "Jumbo – Jumbo"],
+    ["cd-faust-tapes.jpg", "Faust – Tapes"],
+    ["lp-hawkwind-masters-of-the-universe.jpg", "Hawkwind – Masters of the Universe"],
+    ["cd-family-anyway.jpg", "Family – Anyway..."],
+    ["lp-ian-anderson-orchestral-jethro-tull.jpg", "Ian Anderson – Plays the Orchestral Jethro Tull"],
+    ["cd-babe-ruth-first-base-amar-caballero.jpg", "Babe Ruth – First Base / Amar Caballero"],
+    ["cd-cmu-space-cabaret.jpg", "CMU – Space Cabaret"],
+    ["cd-mountain-twin-peaks.jpg", "Mountain – Twin Peaks"],
+    ["cd-dust.jpg", "Dust – Dust"],
+    ["cd-epitaph-stop-look-and-listen.jpg", "Epitaph – Stop, Look and Listen"],
+    ["lp-ozzy-bark-at-the-moon.jpg", "Ozzy Osbourne – Bark at the Moon"],
+    ["lp-ozzy-randy-rhoads-tribute.jpg", "Ozzy Osbourne & Randy Rhoads – Tribute"],
+    ["cd-dream-theater-view-from-the-top.jpg", "Dream Theater – A View from the Top of the World"],
+    ["cd-supersister-present-from-nancy-2.jpg", "Supersister – Present from Nancy"],
+    ["cd-soft-machine-5.jpg", "Soft Machine – 5"],
+    ["cd-magna-carta-seasons.jpg", "Magna Carta – Seasons"],
+    ["cd-gnidrolog-lady-lake.jpg", "Gnidrolog – Lady Lake"],
+    ["cd-le-orme-felona-e-sorona.jpg", "Le Orme – Felona e Sorona"]
   ];
 
   (function () {
-    var last = [];
-    try { last = JSON.parse(localStorage.getItem("lastRecords") || "[]"); } catch (e) {}
+    var li = document.querySelector(".records li"), img = li.querySelector("img");
+    var tag = document.createElement("p"); tag.className = "tag"; li.appendChild(tag);
+    var wall = document.querySelector(".wall"), name = document.querySelector(".name");
+    var chosen = null;      // the wall column picked on this visit, kept when the window is resized
 
-    // shuffle a copy, then prefer records that were not shown last time
-    var pool = records.slice();
-    for (var i = pool.length - 1; i > 0; i--) {
-      var j = Math.floor(Math.random() * (i + 1));
-      var t = pool[i]; pool[i] = pool[j]; pool[j] = t;
+    function find(file) {
+      for (var i = 0; i < records.length; i++) if (records[i][0] === file) return records[i];
+      return null;
     }
-    pool.sort(function (a, b) {
-      return (last.indexOf(a[0]) >= 0) - (last.indexOf(b[0]) >= 0);
-    });
 
-    var imgs = document.querySelectorAll(".records img");
-    var shown = [];
-    for (var k = 0; k < imgs.length && k < pool.length; k++) {
-      imgs[k].src = RECORDS_DIR + pool[k][0];
-      imgs[k].alt = pool[k][1];
-      imgs[k].dataset.mbid = pool[k][2] || "";
-      shown.push(pool[k][0]);
+    function place() {
+      var mt = WALL.tile, n = name.getBoundingClientRect();
+      // slide the wall so one row of covers is centred on the name
+      var mid = n.top + n.height / 2, off = ((mid - mt / 2) % mt + mt) % mt;
+      wall.style.backgroundPositionY = off + "px";
+      var r = Math.round((mid - mt / 2 - off) / mt);
+      // a column beside the name, left or right
+      var cols = Math.floor(innerWidth / mt), choices = [];
+      for (var c = 1; c <= Math.floor(n.left / mt) - 1; c++) choices.push(c);
+      for (c = Math.ceil(n.right / mt); c < cols - 1; c++) choices.push(c);
+      if (!choices.length) { li.parentNode.style.display = "none"; return; }
+      li.parentNode.style.display = "";
+      if (chosen === null || choices.indexOf(chosen) < 0)
+        chosen = choices[Math.floor(Math.random() * choices.length)];
+      var rec = (FEATURED && find(FEATURED)) ||
+                find(WALL.cells[(r % WALL.rows) * WALL.cols + (chosen % WALL.cols)]) || records[0];
+      var ul = li.parentNode;
+      ul.style.left = chosen * mt + "px";
+      ul.style.top = (r * mt + off) + "px";
+      if (img.alt !== rec[1]) {
+        img.src = RECORDS_DIR + rec[0];
+        img.alt = rec[1];
+        img.dataset.mbid = rec[2] || "";
+        var p = rec[1].split(" \u2013 ");
+        tag.textContent = "";
+        var b = document.createElement("b"); b.textContent = p[0]; tag.appendChild(b);
+        if (p[1]) tag.appendChild(document.createTextNode(p.slice(1).join(" \u2013 ")));
+      }
     }
-    try { localStorage.setItem("lastRecords", JSON.stringify(shown)); } catch (e) {}
+
+    place();
+    if (document.fonts) document.fonts.ready.then(place);   // the name changes size when its font arrives
+    addEventListener("resize", place);
   })();
   </script>
   <ul class="drawings">
