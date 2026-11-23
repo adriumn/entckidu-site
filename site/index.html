@@ -83,6 +83,13 @@
       font-family: "EB Garamond", serif; font-style: italic; font-size: 0.95rem; line-height: 1.25; color: #bfe0f8;
       background: rgba(6,18,45,0.82); padding: 0.3rem 0.5rem; border-radius: 0.3rem;
     }
+    /* v0.5: any cover in the wall can be clicked; a soft glow shows which one */
+    .wall-hover {
+      position: fixed; z-index: 1; width: var(--mt); height: var(--mt); pointer-events: none;
+      outline: 2px solid rgba(239,231,212,0.7); box-shadow: 0 0 1.6rem rgba(168,210,242,0.5);
+      background: rgba(255,255,255,0.06); display: none;
+    }
+    body.on-wall { cursor: zoom-in; }
     ul.records .tag b { display: block; font-family: "Cinzel", serif; font-style: normal; font-weight: 800;
       color: #fff8e8; letter-spacing: 0.05em; }
 
@@ -302,7 +309,7 @@
 <body>
   <div class="wall"></div><div class="veil"></div>
   <nav class="topbar">
-    <div class="version">v0.4<span>23 Nov 2026</span></div>
+    <div class="version">v0.5<span>24 Nov 2026</span></div>
     <a href="/" aria-current="page">music</a>
     <a href="#">drawings</a>
     <a href="#">laziness</a>
@@ -315,7 +322,7 @@
   <script>
   /* FEATURED: the cover that lights up next to the name.
      Put a file name from the list below, or "" to pick one at random. */
-  var FEATURED = "lp-kenny-rogers-moonlight.jpg";
+  var FEATURED = "";
 
   /* The records list. To add a record: put its photo in images/records/,
      add a line below, then rebuild the wall: python tools/make-wall.py
@@ -714,9 +721,50 @@
       });
     });
 
+    window.openRecord = open;      // used by the wall (v0.5)
     zoom.addEventListener("click", close);
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && zoom.classList.contains("open")) close();
+    });
+  })();
+  </script>
+  <script>
+  /* v0.5: click any cover in the background wall to see it big, with its details.
+     WALL (images/wall.js) says which photo sits in which cell. */
+  (function () {
+    var wall = document.querySelector(".wall");
+    var glow = document.createElement("div"); glow.className = "wall-hover"; document.body.appendChild(glow);
+
+    function onWall(e) {           // true when the pointer is on bare background, not on the name, drawings or header
+      return e.target === document.body || e.target === document.documentElement;
+    }
+    function cellAt(x, y) {
+      var mt = WALL.tile, off = parseFloat(wall.style.backgroundPositionY) || 0;
+      var c = Math.floor(x / mt), r = Math.floor((y - off) / mt);
+      var file = WALL.cells[(((r % WALL.rows) + WALL.rows) % WALL.rows) * WALL.cols + (c % WALL.cols)];
+      for (var i = 0; i < records.length; i++)
+        if (records[i][0] === file) return { rec: records[i], left: c * mt, top: r * mt + off };
+      return null;
+    }
+
+    document.addEventListener("mousemove", function (e) {
+      var cell = onWall(e) && cellAt(e.clientX, e.clientY);
+      document.body.classList.toggle("on-wall", !!cell);
+      glow.style.display = cell ? "block" : "none";
+      if (cell) { glow.style.left = cell.left + "px"; glow.style.top = cell.top + "px"; }
+    });
+    document.addEventListener("mouseleave", function () { glow.style.display = "none"; });
+
+    document.addEventListener("click", function (e) {
+      if (!onWall(e)) return;
+      var cell = cellAt(e.clientX, e.clientY);
+      if (!cell) return;
+      var img = new Image();               // a stand-in for the clicked cover, for the big view
+      img.src = RECORDS_DIR + cell.rec[0];
+      img.alt = cell.rec[1];
+      img.dataset.mbid = cell.rec[2] || "";
+      glow.style.display = "none";
+      window.openRecord(img);
     });
   })();
   </script>
