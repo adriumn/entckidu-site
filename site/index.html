@@ -113,29 +113,34 @@
       object-fit: cover;          /* crops each photo to a square, no stretching */
     }
 
-    /* Drawings: one small strip under the LPs, just a hint.
-       Same total width as the LP row; each drawing keeps its own shape. */
+    /* Drawings: a strip of sketchbook paper under the LPs, so they read as
+       their own thing and not as more records. Same total width as the LP
+       row; each drawing keeps its own shape. */
     .drawings {
       list-style: none;
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: calc(var(--gap) / 2);
+      margin-top: 3vh;                       /* a little more air after the records */
+      padding: calc(var(--gap) * 1.5) calc(var(--gap) * 2.2);
       width: calc(var(--cols) * var(--tile) + (var(--cols) - 1) * var(--gap));
-      --dh: calc((var(--cols) * var(--tile) + (var(--cols) - 1) * var(--gap) - 8 * var(--gap) / 2) / 9.6);
+      /* warm paper with very faint pencil sketches (images/paper-sketch.svg) */
+      background: #e9e1cf url("images/paper-sketch.svg") center / cover;
+      box-shadow: 0 0.8rem 2.2rem rgba(0, 0, 0, 0.45);
+      /* drawing height: fits all 9 on one line inside the paper's padding */
+      --dh: calc((var(--cols) * var(--tile) + (var(--cols) - 1) * var(--gap) - 4.4 * var(--gap) - 8 * var(--gap) / 2) / 9.6);
     }
 
     .drawings li {
       height: var(--dh);
-      padding: 2px;
-      border: 1px solid rgba(239, 231, 212, 0.35);   /* fainter frame */
+      box-shadow: 0 1px 3px rgba(60, 40, 20, 0.35);   /* like sheets lying on the paper */
     }
 
     .drawings img {
       display: block;
       height: 100%;
       width: auto;
-      opacity: 0.85;               /* a little quieter than the LPs */
     }
 
     /* phones: the middle 3 LPs, bigger; drawings wrap into short rows */
