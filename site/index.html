@@ -158,10 +158,11 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       gap: 1.4rem;
       padding: 5vh 6vw;
-      background: rgba(4, 11, 28, 0.94);
+      overflow-y: auto;                 /* scrolls when the details make it taller than the screen */
+      background: rgba(4, 11, 28, 0.97);   /* a bit darker so the details text reads well */
       cursor: zoom-out;
       opacity: 0;
       visibility: hidden;
@@ -179,6 +180,8 @@
       box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.6);
       transform: scale(0.94);
       transition: transform 0.25s ease;
+      margin-top: auto;                 /* with the margin below: centred when it fits */
+      flex-shrink: 0;
     }
     .zoom.open img { transform: scale(1); }
 
@@ -201,21 +204,61 @@
       color: #bfe0f8;
       text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
     }
+
+    /* album details from MusicBrainz, filled in after the enlarged view opens */
+    .zoom .details {
+      max-width: min(40rem, 88vw);
+      font-family: "EB Garamond", Garamond, "Times New Roman", serif;
+      font-size: clamp(0.95rem, 2.2vw, 1.1rem);
+      line-height: 1.45;
+      color: rgba(239, 231, 212, 0.85);
+      cursor: default;
+      margin-bottom: auto;
+    }
+    .zoom .details > * + * { margin-top: 0.7rem; }
+    .zoom .details .loading { font-style: italic; color: rgba(168, 210, 242, 0.7); }
+    .zoom .details .meta {
+      font-family: "Cinzel", "Trajan Pro", "Times New Roman", serif;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: #a8d2f2;
+    }
+    .zoom .details .genres { font-style: italic; color: #bfe0f8; }
+    .zoom .details .members span { white-space: nowrap; }
+    .zoom .details .members i { color: rgba(239, 231, 212, 0.6); }
+    .zoom .details ol {
+      list-style: none;
+      columns: 2 14rem;
+      column-gap: 2rem;
+      text-align: left;
+      font-size: 0.95em;
+    }
+    .zoom .details li { break-inside: avoid; display: flex; gap: 0.6rem; }
+    .zoom .details li .n { min-width: 1.8em; color: rgba(168, 210, 242, 0.7); }
+    .zoom .details li .t { flex: 1; }
+    .zoom .details li .l { color: rgba(239, 231, 212, 0.55); font-variant-numeric: tabular-nums; }
+    .zoom .details .source { font-size: 0.85em; }
+    .zoom .details a { color: rgba(168, 210, 242, 0.8); }
   </style>
 </head>
 <body>
   <h1 class="name" aria-label="eNTckidu"><span class="e">e</span><span class="nt">NT</span><span class="c">c</span><span class="k">k</span>id<span class="u">u</span></h1>
   <p class="tagline">music, drawings, laziness.</p>
   <ul class="records">
-        <li><img src="jane-here-we-are.jpg" alt="Jane – Here We Are" width="600" height="600"></li>
-    <li><img src="thin-lizzy-chinatown.jpg" alt="Thin Lizzy – Chinatown" width="600" height="600"></li>
-    <li><img src="king-crimson-lizard.jpg" alt="King Crimson – Lizard" width="600" height="600"></li>
-    <li><img src="talking-heads-naked.jpg" alt="Talking Heads – Naked" width="600" height="600"></li>
-    <li><img src="experimental.jpg" alt="Experimental" width="600" height="600"></li>
+        <li><img src="images/records/jane-here-we-are.jpg" alt="Jane – Here We Are" width="600" height="600"></li>
+    <li><img src="images/records/thin-lizzy-chinatown.jpg" alt="Thin Lizzy – Chinatown" width="600" height="600"></li>
+    <li><img src="images/records/king-crimson-lizard.jpg" alt="King Crimson – Lizard" width="600" height="600"></li>
+    <li><img src="images/records/talking-heads-naked.jpg" alt="Talking Heads – Naked" width="600" height="600"></li>
+    <li><img src="images/records/experimental.jpg" alt="Experimental" width="600" height="600"></li>
   </ul>
   <script>
   /* Shows a random 5 of the records on every visit or refresh.
-     To add a record: upload its photo next to index.html and add a line below. */
+     To add a record: put its photo in images/records/ and add a line below:
+       ["file.jpg", "Band – Album"]
+     Optional third value: the MusicBrainz release ID, when the automatic
+     lookup picks the wrong album or the entry has no album name:
+       ["file.jpg", "Band – Album", "b6d2e0f8-...."] */
+  var RECORDS_DIR = "images/records/";
   var records = [
     ["jane-here-we-are.jpg", "Jane – Here We Are"],
     ["thin-lizzy-chinatown.jpg", "Thin Lizzy – Chinatown"],
@@ -279,23 +322,24 @@
     var imgs = document.querySelectorAll(".records img");
     var shown = [];
     for (var k = 0; k < imgs.length && k < pool.length; k++) {
-      imgs[k].src = pool[k][0];
+      imgs[k].src = RECORDS_DIR + pool[k][0];
       imgs[k].alt = pool[k][1];
+      imgs[k].dataset.mbid = pool[k][2] || "";
       shown.push(pool[k][0]);
     }
     try { localStorage.setItem("lastRecords", JSON.stringify(shown)); } catch (e) {}
   })();
   </script>
   <ul class="drawings">
-    <li><img src="drawing-face.jpg" alt="Drawing: portrait of a man"></li>
-    <li class="wide"><img src="drawing-bassist.jpg" alt="Drawing: bass player in sunglasses"></li>
-    <li><img src="drawing-celelalte-cuvinte.jpg" alt="Drawing: Celelalte Cuvinte"></li>
-    <li><img src="drawing-harmonica.jpg" alt="Drawing: musician in profile"></li>
-    <li><img src="drawing-beard.jpg" alt="Drawing: bearded man"></li>
-    <li class="wide"><img src="drawing-pianist.jpg" alt="Drawing: musician at the keys"></li>
-    <li class="wide"><img src="drawing-wild-hair.jpg" alt="Drawing: head with wild hair"></li>
-    <li><img src="drawing-long-hair.jpg" alt="Drawing: long-haired face"></li>
-    <li><img src="drawing-guitar-man.jpg" alt="Drawing: man with guitar"></li>
+    <li><img src="images/drawings/drawing-face.jpg" alt="Drawing: portrait of a man"></li>
+    <li class="wide"><img src="images/drawings/drawing-bassist.jpg" alt="Drawing: bass player in sunglasses"></li>
+    <li><img src="images/drawings/drawing-celelalte-cuvinte.jpg" alt="Drawing: Celelalte Cuvinte"></li>
+    <li><img src="images/drawings/drawing-harmonica.jpg" alt="Drawing: musician in profile"></li>
+    <li><img src="images/drawings/drawing-beard.jpg" alt="Drawing: bearded man"></li>
+    <li class="wide"><img src="images/drawings/drawing-pianist.jpg" alt="Drawing: musician at the keys"></li>
+    <li class="wide"><img src="images/drawings/drawing-wild-hair.jpg" alt="Drawing: head with wild hair"></li>
+    <li><img src="images/drawings/drawing-long-hair.jpg" alt="Drawing: long-haired face"></li>
+    <li><img src="images/drawings/drawing-guitar-man.jpg" alt="Drawing: man with guitar"></li>
   </ul>
 
   <!-- enlarged record: opens when a record is clicked -->
@@ -305,6 +349,7 @@
       <p class="artist"></p>
       <p class="album"></p>
     </div>
+    <div class="details" aria-live="polite"></div>
   </div>
   <script>
   /* Click a record to see it big, with the artist and album underneath.
@@ -327,9 +372,88 @@
       opener = img;
       zoom.classList.add("open");
       zoom.setAttribute("aria-hidden", "false");
+      zoom.scrollTop = 0;
+      loadDetails(parts[0], parts.slice(1).join(" – "), img.dataset.mbid);
+    }
+
+    /* ---- album details: asks our Azure Function (/api/album), which asks MusicBrainz ---- */
+    var details = zoom.querySelector(".details");
+    var answers = {};     // remembered for this visit: the same record opens instantly the second time
+    var current = 0;      // which opening the panel belongs to, so a late answer never lands on another record
+
+    function loadDetails(artistName, albumName, mbid) {
+      var mine = ++current;
+      details.textContent = "";
+      var url;
+      if (mbid) url = "/api/album?mbid=" + encodeURIComponent(mbid);
+      else if (albumName) url = "/api/album?artist=" + encodeURIComponent(artistName) + "&album=" + encodeURIComponent(albumName);
+      else return;        // no album name and no ID: nothing to look up
+
+      var loading = add(details, "p", "loading", "looking up details…");
+
+      if (!answers[url]) {
+        var ctrl = window.AbortController ? new AbortController() : null;
+        var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 20000);
+        answers[url] = fetch(url, ctrl ? { signal: ctrl.signal } : {})
+          .then(function (res) { return res.ok ? res.json() : null; })
+          .catch(function () { return null; })
+          .then(function (data) {
+            clearTimeout(timer);
+            if (!data) delete answers[url];   // a failure may be temporary: try again next time
+            return data;
+          });
+      }
+      answers[url].then(function (data) {
+        if (mine !== current) return;         // the visitor has moved on
+        details.textContent = "";
+        if (data) show(data);
+      });
+    }
+
+    function show(d) {
+      var meta = [d.year, d.label, d.country, d.format].filter(Boolean);
+      if (meta.length) add(details, "p", "meta", meta.join(" · "));
+      if (d.genres && d.genres.length) add(details, "p", "genres", d.genres.join(", "));
+
+      if (d.members && d.members.length) {
+        var m = add(details, "p", "members");
+        d.members.forEach(function (x, i) {
+          if (i) m.appendChild(document.createTextNode(" · "));
+          var s = add(m, "span", "", x.name);
+          var extra = [x.roles, x.years].filter(Boolean).join(", ");
+          if (extra) { s.appendChild(document.createTextNode(" ")); add(s, "i", "", extra); }
+        });
+      }
+
+      if (d.tracks && d.tracks.length) {
+        var ol = add(details, "ol");
+        d.tracks.forEach(function (t) {
+          var li = add(ol, "li");
+          add(li, "span", "n", t.number);
+          add(li, "span", "t", t.title);
+          if (t.length) add(li, "span", "l", t.length);
+        });
+      }
+
+      var src = add(details, "p", "source");
+      var a = add(src, "a", "", "details from MusicBrainz");
+      a.href = d.musicBrainzUrl;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.addEventListener("click", function (e) { e.stopPropagation(); });   // open the link, keep the view
+    }
+
+    // makes an element with text (never HTML, so odd names can't break the page)
+    function add(parent, tag, cls, text) {
+      var el = document.createElement(tag);
+      if (cls) el.className = cls;
+      if (text != null) el.textContent = text;
+      parent.appendChild(el);
+      return el;
     }
 
     function close() {
+      current++;
       zoom.classList.remove("open");
       zoom.setAttribute("aria-hidden", "true");
       if (opener) opener.focus();
