@@ -37,9 +37,14 @@
     :root { --mt: 104px; }                     /* one cover in the wall */
     .wall {
       position: fixed; inset: 0; z-index: -2;
-      background: url("images/wall.jpg") 0 0 / calc(15 * var(--mt)) auto repeat;
+      background: 0 0 / calc(15 * var(--mt)) auto repeat;   /* v0.6: picture set by the shuffle script */
+      opacity: 0; transition: opacity 0.6s;
       filter: saturate(0.9) brightness(0.78);
     }
+    .wall.ready { opacity: 1; }
+    /* v0.6: a cover fading into a new one, sitting on top of its cell until the fade ends */
+    .wall-swap { position: absolute; width: var(--mt); height: var(--mt);
+      background-size: 100% 100%; opacity: 0; transition: opacity 1.6s ease-in-out; }
     /* blue veil: keeps a little of the old blue and darkens the spot behind the name */
     .veil {
       position: fixed; inset: 0; z-index: -1; pointer-events: none;
@@ -135,6 +140,19 @@
       text-decoration: underline;
       text-decoration-thickness: 0.055em;
       text-underline-offset: 0.09em;
+    }
+
+    /* v0.6: the quote under the name: one short line from a track, with its source */
+    .quote {
+      margin-top: 1.2vh; max-width: min(90vw, 46rem); text-align: center;
+      font-family: "EB Garamond", Garamond, "Times New Roman", serif;
+      font-style: italic; font-size: clamp(1rem, 2.4vw, 1.6rem); line-height: 1.3;
+      color: #a8d2f2;
+    }
+    .quote[hidden] { display: none; }
+    .quote .from {
+      display: block; margin-top: 0.25rem; font-style: normal; font-size: 0.6em;
+      letter-spacing: 0.06em; color: rgba(239, 231, 212, 0.65);
     }
 
     /* Line 2: one line, classical Garamond, sized to always fit the width */
@@ -309,20 +327,143 @@
 <body>
   <div class="wall"></div><div class="veil"></div>
   <nav class="topbar">
-    <div class="version">v0.5<span>24 Nov 2026</span></div>
+    <div class="version">v0.6<span>24 Nov 2026</span></div>
     <a href="/" aria-current="page">music</a>
     <a href="#">drawings</a>
     <a href="#">laziness</a>
   </nav>
   <h1 class="name" aria-label="eNTckidu"><span class="e">e</span><span class="nt">NT</span><span class="c">c</span><span class="k">k</span>id<span class="u">u</span></h1>
+  <p class="quote" hidden></p>
   <ul class="records">
     <li><img src="" alt="" width="480" height="480"></li>
   </ul>
   <script src="images/wall.js"></script>
   <script>
+  /* v0.6: a new wall on every visit.
+     images/wall.jpg holds every cover once (see tools/make-wall.py). Here the covers
+     are dealt into a new random order, drawn into a canvas, and that becomes the
+     wall. Every SWAP_EVERY seconds one cover on screen fades into another one.
+     WALL.cells is updated, so clicking a cover still opens the right record. */
+  var SWAP_EVERY = 7;        // seconds between two covers changing; 0 = never
+  (function () {
+    var wall = document.querySelector(".wall");
+    var sprite = WALL.cells.slice();          // where each cover sits inside wall.jpg
+    var at = {};                              // file -> its place in wall.jpg
+    sprite.forEach(function (f, k) { if (!(f in at)) at[f] = k; });
+    var files = Object.keys(at);
+
+    // shuffle (Fisher-Yates); the featured cover and the clicks read WALL.cells after this
+    var cells = sprite.slice();
+    for (var i = cells.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1)), t = cells[i]; cells[i] = cells[j]; cells[j] = t;
+    }
+    WALL.cells = cells;
+
+    var pic = new Image(), canvas, ctx, px, url = null;
+    function tile(f, k) {                     // copy cover f from wall.jpg into cell k of the canvas
+      var s = at[f];
+      ctx.drawImage(pic, (s % WALL.cols) * px, Math.floor(s / WALL.cols) * px, px, px,
+                    (k % WALL.cols) * px, Math.floor(k / WALL.cols) * px, px, px);
+    }
+    function publish(done) {                  // the canvas becomes the wall's background
+      canvas.toBlob(function (blob) {
+        var next = URL.createObjectURL(blob), probe = new Image();
+        probe.onload = function () {          // decoded first, so the wall never blinks
+          wall.style.backgroundImage = 'url("' + next + '")';
+          if (url) URL.revokeObjectURL(url);
+          url = next;
+          wall.classList.add("ready");
+          if (done) done();
+        };
+        probe.src = next;
+      }, "image/jpeg", 0.9);
+    }
+    function fallback() {                     // no canvas (very old browser): the plain wall
+      WALL.cells = sprite;
+      wall.style.backgroundImage = 'url("images/wall.jpg")';
+      wall.classList.add("ready");
+    }
+
+    pic.onload = function () {
+      try {
+        px = pic.naturalWidth / WALL.cols;
+        canvas = document.createElement("canvas");
+        canvas.width = pic.naturalWidth; canvas.height = WALL.rows * px;
+        ctx = canvas.getContext("2d");
+        WALL.cells.forEach(tile);
+        publish(startSwaps);
+      } catch (e) { fallback(); }
+    };
+    pic.onerror = fallback;
+    pic.src = "images/wall.jpg";
+
+    function startSwaps() {
+      if (!SWAP_EVERY || (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
+      setInterval(swap, SWAP_EVERY * 1000);
+    }
+    function onScreen() {                     // cells visible right now: {k, left, top}
+      var mt = WALL.tile, off = parseFloat(wall.style.backgroundPositionY) || 0, out = [];
+      for (var r = Math.floor(-off / mt); r * mt + off < innerHeight; r++)
+        for (var c = 0; c * mt < innerWidth; c++) {
+          var k = (((r % WALL.rows) + WALL.rows) % WALL.rows) * WALL.cols + (c % WALL.cols);
+          out.push({ k: k, left: c * mt, top: r * mt + off });
+        }
+      return out;
+    }
+    var busy = false;
+    function swap() {
+      if (busy || document.hidden || document.querySelector(".zoom.open")) return;
+      var vis = onScreen().filter(function (v) { return v.k !== window.featuredCell; });
+      if (!vis.length) return;
+      var shown = {};
+      vis.forEach(function (v) { shown[WALL.cells[v.k]] = true; });
+      var pick = vis[Math.floor(Math.random() * vis.length)], f = null;
+      for (var n = 0; n < 30 && !f; n++) {    // a cover that is not on screen already
+        var g = files[Math.floor(Math.random() * files.length)];
+        if (!shown[g]) f = g;
+      }
+      if (!f) return;
+      busy = true;
+      // the new cover, alone, fades in over the old one
+      var one = document.createElement("canvas"); one.width = one.height = px;
+      var s = at[f];
+      one.getContext("2d").drawImage(pic, (s % WALL.cols) * px, Math.floor(s / WALL.cols) * px, px, px, 0, 0, px, px);
+      var cover = document.createElement("div");
+      cover.className = "wall-swap";
+      cover.style.left = pick.left + "px"; cover.style.top = pick.top + "px";
+      cover.style.backgroundImage = 'url("' + one.toDataURL("image/jpeg", 0.9) + '")';
+      wall.appendChild(cover);
+      WALL.cells[pick.k] = f;                 // clicks see the new cover straight away
+      requestAnimationFrame(function () { requestAnimationFrame(function () { cover.style.opacity = 1; }); });
+      setTimeout(function () {                // fade done: paint it into the wall for good
+        tile(f, pick.k);
+        publish(function () { cover.remove(); busy = false; });
+      }, 1700);
+    }
+  })();
+  </script>
+  <script>
   /* FEATURED: the cover that lights up next to the name.
      Put a file name from the list below, or "" to pick one at random. */
   var FEATURED = "";
+
+  /* QUOTE: one short line under the name, from a track on one of the records.
+     To change it, edit the three values. With line left "", nothing is shown. */
+  var QUOTE = {
+    line:  "",
+    track: "Cosmik Debris",
+    album: "Frank Zappa – Apostrophe (')"
+  };
+  (function () {
+    var q = document.querySelector(".quote");
+    if (!QUOTE.line) return;
+    q.textContent = "“" + QUOTE.line + "”";
+    var from = document.createElement("span");
+    from.className = "from";
+    from.textContent = [QUOTE.track, QUOTE.album].filter(Boolean).join(" · ");
+    q.appendChild(from);
+    q.hidden = false;
+  })();
 
   /* The records list. To add a record: put its photo in images/records/,
      add a line below, then rebuild the wall: python tools/make-wall.py
@@ -535,7 +676,44 @@
     ["cd-soft-machine-5.jpg", "Soft Machine – 5"],
     ["cd-magna-carta-seasons.jpg", "Magna Carta – Seasons"],
     ["cd-gnidrolog-lady-lake.jpg", "Gnidrolog – Lady Lake"],
-    ["cd-le-orme-felona-e-sorona.jpg", "Le Orme – Felona e Sorona"]
+    ["cd-le-orme-felona-e-sorona.jpg", "Le Orme – Felona e Sorona"],
+    ["cd-elton-john-songs-from-the-west-coast.jpg", "Elton John – Songs from the West Coast"],
+    ["cd-mark-knopfler-sailing-to-philadelphia.jpg", "Mark Knopfler – Sailing to Philadelphia"],
+    ["cd-summers-fripp-bewitched.jpg", "Andy Summers & Robert Fripp – Bewitched"],
+    ["lp-led-zeppelin-houses-of-the-holy.jpg", "Led Zeppelin – Houses of the Holy"],
+    ["lp-robert-fripp-let-the-power-fall.jpg", "Robert Fripp – Let the Power Fall"],
+    ["cd-byrne-eno-everything-that-happens.jpg", "David Byrne & Brian Eno – Everything That Happens Will Happen Today"],
+    ["lp-masters-of-reality.jpg", "Masters of Reality – Masters of Reality"],
+    ["lp-silos.jpg", "The Silos – The Silos"],
+    ["lp-doctors-of-madness-late-night-movies.jpg", "Doctors of Madness – Late Night Movies, All Night Brainstorms"],
+    ["cd-wapassou-salammbo.jpg", "Wapassou – Salammbô"],
+    ["cd-magma-udu-wudu.jpg", "Magma – Üdü Wüdü"],
+    ["lp-spooky-tooth-spooky-two.jpg", "Spooky Tooth – Spooky Two"],
+    ["lp-acdc-back-in-black.jpg", "AC/DC – Back in Black"],
+    ["lp-colosseum-valentyne-suite.jpg", "Colosseum – Valentyne Suite"],
+    ["cd-blackbirds-no-destination.jpg", "The Blackbirds – No Destination"],
+    ["lp-wallenstein-charline.jpg", "Wallenstein – Charline"],
+    ["lp-spirit-farther-along.jpg", "Spirit – Farther Along"],
+    ["cd-gnidrolog-in-spite-of-harrys-toe-nail.jpg", "Gnidrolog – ...In Spite of Harry's Toe-Nail"],
+    ["lp-jethro-tull-a.jpg", "Jethro Tull – A"],
+    ["lp-flairck-the-ladys-back.jpg", "Flairck – The Lady's Back"],
+    ["cd-frank-zappa-apostrophe.jpg", "Frank Zappa – Apostrophe (')"],
+    ["cd-hopper-dean-tippett-gallivan-cruel-but-fair.jpg", "Hopper/Dean/Tippett/Gallivan – Cruel but Fair"],
+    ["cd-guru-guru-hinten.jpg", "Guru Guru – Hinten"],
+    ["cd-bjork-debut.jpg", "Björk – Debut"],
+    ["lp-never-never-land.jpg", "Never Never Land"],
+    ["lp-black-sabbath-sabbath-bloody-sabbath.jpg", "Black Sabbath – Sabbath Bloody Sabbath"],
+    ["lp-pink-floyd-animals.jpg", "Pink Floyd – Animals"],
+    ["lp-dire-straits.jpg", "Dire Straits – Dire Straits"],
+    ["lp-jethro-tull-minstrel-in-the-gallery.jpg", "Jethro Tull – Minstrel in the Gallery"]
+  ];
+
+  /* NOT_FEATURED: covers that stay in the wall but are never picked as the big
+     featured cover next to the name. Add or remove file names freely. */
+  var NOT_FEATURED = [
+    "lp-led-zeppelin-houses-of-the-holy.jpg", "lp-wallenstein-charline.jpg",
+    "lp-flairck-the-ladys-back.jpg", "cd-guru-guru-hinten.jpg",
+    "lp-black-sabbath-sabbath-bloody-sabbath.jpg"
   ];
 
   (function () {
@@ -559,6 +737,10 @@
       var cols = Math.floor(innerWidth / mt), choices = [];
       for (var c = 1; c <= Math.floor(n.left / mt) - 1; c++) choices.push(c);
       for (c = Math.ceil(n.right / mt); c < cols - 1; c++) choices.push(c);
+      var ok = choices.filter(function (c) {          // v0.6: skip covers in NOT_FEATURED
+        return NOT_FEATURED.indexOf(WALL.cells[(r % WALL.rows) * WALL.cols + (c % WALL.cols)]) < 0;
+      });
+      if (ok.length) choices = ok;
       if (!choices.length) { li.parentNode.style.display = "none"; return; }
       li.parentNode.style.display = "";
       if (chosen === null || choices.indexOf(chosen) < 0)
@@ -566,6 +748,7 @@
       var rec = (FEATURED && find(FEATURED)) ||
                 find(WALL.cells[(r % WALL.rows) * WALL.cols + (chosen % WALL.cols)]) || records[0];
       var ul = li.parentNode;
+      window.featuredCell = (r % WALL.rows) * WALL.cols + (chosen % WALL.cols);   // the swapper leaves it alone
       ul.style.left = chosen * mt + "px";
       ul.style.top = (r * mt + off) + "px";
       if (img.alt !== rec[1]) {

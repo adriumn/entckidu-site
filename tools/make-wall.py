@@ -1,7 +1,7 @@
 """Builds the background wall of covers for entckidu.net.
 
-Reads the records list from site/index.html, shuffles it (fixed seed, so the
-wall only changes when records are added), and writes:
+Reads the records list from site/index.html and writes the covers in a fixed
+order (the page itself shuffles them on every visit):
   site/images/wall.jpg  - one picture with every cover, 15 per row
   site/images/wall.js   - which cover sits in which cell (used to light one up)
 Run from the repo root:  python tools/make-wall.py   (needs Pillow)
