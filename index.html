@@ -157,6 +157,60 @@
     <li><img src="talking-heads-naked.jpg" alt="Talking Heads – Naked" width="600" height="600"></li>
     <li><img src="experimental.jpg" alt="Experimental" width="600" height="600"></li>
   </ul>
+  <script>
+  /* Shows a random 5 of the records on every visit or refresh.
+     To add a record: upload its photo next to index.html and add a line below. */
+  var records = [
+    ["jane-here-we-are.jpg", "Jane – Here We Are"],
+    ["thin-lizzy-chinatown.jpg", "Thin Lizzy – Chinatown"],
+    ["king-crimson-lizard.jpg", "King Crimson – Lizard"],
+    ["talking-heads-naked.jpg", "Talking Heads – Naked"],
+    ["experimental.jpg", "Experimental"],
+    ["lp-guru-guru.jpg", "Guru Guru – This Is Guru Guru"],
+    ["lp-kenny-rogers.jpg", "Kenny Rogers – We've Got Tonight"],
+    ["lp-yusuf.jpg", "Yusuf – An Other Cup"],
+    ["lp-gong-magick-brother.jpg", "Gong – Magick Brother"],
+    ["lp-celelalte-cuvinte-stem.jpg", "Celelalte Cuvinte – .STEM"],
+    ["lp-gunesh.jpg", "Gunesh"],
+    ["lp-kebnekajse.jpg", "Kebnekajse – Resa mot okänt mål"],
+    ["lp-moving-gelatine-plates.jpg", "Moving Gelatine Plates – The World of Genius Hans"],
+    ["lp-catapilla-changes.jpg", "Catapilla – Changes"],
+    ["lp-soft-machine.jpg", "Soft Machine – Softs"],
+    ["lp-rush-roll-the-bones.jpg", "Rush – Roll the Bones"],
+    ["lp-omega.jpg", "Omega"],
+    ["lp-partizan.jpg", "Partizan – Am cu ce"],
+    ["lp-van-der-graaf-godbluff.jpg", "Van der Graaf Generator – Godbluff"],
+    ["lp-mark-almond-ii.jpg", "Mark-Almond II"],
+    ["lp-gentle-giant-free-hand.jpg", "Gentle Giant – Free Hand"],
+    ["lp-jurgen-pluta-blanche.jpg", "Jürgen Pluta – Blanche"],
+    ["lp-formatii-rock-4.jpg", "Formații rock 4"],
+    ["lp-can-tago-mago.jpg", "Can – Tago Mago"]
+  ];
+
+  (function () {
+    var last = [];
+    try { last = JSON.parse(localStorage.getItem("lastRecords") || "[]"); } catch (e) {}
+
+    // shuffle a copy, then prefer records that were not shown last time
+    var pool = records.slice();
+    for (var i = pool.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = pool[i]; pool[i] = pool[j]; pool[j] = t;
+    }
+    pool.sort(function (a, b) {
+      return (last.indexOf(a[0]) >= 0) - (last.indexOf(b[0]) >= 0);
+    });
+
+    var imgs = document.querySelectorAll(".records img");
+    var shown = [];
+    for (var k = 0; k < imgs.length && k < pool.length; k++) {
+      imgs[k].src = pool[k][0];
+      imgs[k].alt = pool[k][1];
+      shown.push(pool[k][0]);
+    }
+    try { localStorage.setItem("lastRecords", JSON.stringify(shown)); } catch (e) {}
+  })();
+  </script>
   <ul class="drawings">
     <li><img src="drawing-face.jpg" alt="Drawing: portrait of a man"></li>
     <li class="wide"><img src="drawing-bassist.jpg" alt="Drawing: bass player in sunglasses"></li>
