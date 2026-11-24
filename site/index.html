@@ -142,12 +142,14 @@
       text-underline-offset: 0.09em;
     }
 
-    /* v0.7.1: the tagline, one small line of text under the name */
+    /* v0.7.1: the tagline, one classic line of text under the name */
     .tagline-under {
-      margin-top: 0.8vh; max-width: 90vw; text-align: center;
+      margin-top: calc(-4vh - 0.15em); text-align: center;   /* tucked close under the name */
+      position: relative; z-index: 3; white-space: nowrap;   /* always one line: keep the text short */
       font-family: "EB Garamond", Garamond, "Times New Roman", serif;
-      font-style: italic; font-size: clamp(0.95rem, 1.6vw, 1.25rem); line-height: 1.3;
-      letter-spacing: 0.03em; color: #a8d2f2;
+      font-style: normal; font-weight: 400; font-size: clamp(0.84rem, 2.89vw, 2.58rem); line-height: 1.2;
+      letter-spacing: 0.04em; color: #bfe0f8;
+      text-shadow: 0 2px 14px rgba(0,0,0,0.9), 0 0 2px rgba(0,0,0,0.7);
     }
     .tagline-under:empty { display: none; }
 
@@ -444,7 +446,7 @@
   var FEATURED = "";
 
   /* TAGLINE: one small line of text under the name. Leave it "" to show nothing. */
-  var TAGLINE = "";
+  var TAGLINE = "who you jivin' with that cosmic debris?";
   document.querySelector(".tagline-under").textContent = TAGLINE;
 
   /* The records list. To add a record: put its photo in images/records/,
