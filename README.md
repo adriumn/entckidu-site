@@ -15,19 +15,10 @@ api/                      the Azure Function behind /api/album (C#, .NET 8)
 .github/workflows/        the deploy pipeline (app in site/, API in api/)
 ```
 
-## The quote under the name
+## The tagline under the name
 
-One short line from a track sits under eNTckidu. It lives in `site/index.html`,
-in the `QUOTE` setting near the top of the script (`line`, `track`, `album`).
-Change the three values to show another line; leave `line` as `""` to hide it.
-
-## The wall of covers
-
-`site/images/wall.jpg` holds every cover once; rebuild it after adding records
-with `python tools/make-wall.py`. The page deals the covers into a new random
-order on every visit, and every few seconds one cover fades into another
-(`SWAP_EVERY` in `site/index.html`, 0 turns it off). Covers listed in
-`NOT_FEATURED` stay in the wall but are never the big featured cover.
+One small line of text under eNTckidu: `var TAGLINE = "";` in `site/index.html`.
+Put the text between the quotes; leave it empty to hide the line.
 
 ## Album details
 
