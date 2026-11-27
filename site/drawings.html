@@ -60,19 +60,17 @@
        each drawing keeps its own shape */
     .sheet {
       max-width: 1200px; margin: 0 auto;
-      padding: clamp(0.8rem, 2vw, 1.6rem);
-      background: #d9c79c url("images/paper-sketch.svg") center / cover;
-      box-shadow: 0 1rem 3rem rgba(0,0,0,0.55);
+      /* v0.9.1: no paper sheet here any more - the drawings lie straight on the dark wall */
       columns: 3 260px; column-gap: clamp(0.8rem, 2vw, 1.6rem);
     }
     .sheet button {
       display: block; width: 100%; margin: 0 0 clamp(0.8rem, 2vw, 1.6rem);
       break-inside: avoid; border: 0; padding: 0; background: none; cursor: zoom-in;
-      box-shadow: 0 1px 4px rgba(60,40,20,0.4);
+      box-shadow: 0 0.5rem 1.6rem rgba(0,0,0,0.6);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    .sheet button:hover { transform: rotate(-0.6deg) scale(1.02); box-shadow: 0 0.6rem 1.4rem rgba(60,40,20,0.45); }
-    .sheet button:focus-visible { outline: 3px solid #0b1d45; outline-offset: 3px; }
+    .sheet button:hover { transform: rotate(-0.6deg) scale(1.02); box-shadow: 0 0.8rem 2.4rem rgba(0,0,0,0.75); }
+    .sheet button:focus-visible { outline: 2px solid #efe7d4; outline-offset: 3px; }
     .sheet img { display: block; width: 100%; height: auto; }
 
     /* enlarged drawing */
@@ -83,14 +81,23 @@
       opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0.25s;
     }
     .big.open { opacity: 1; visibility: visible; }
-    .big img {
-      max-width: 88vw; max-height: 80vh; width: auto; height: auto;
-      box-shadow: 0 1.5rem 4rem rgba(0,0,0,0.7); cursor: zoom-out;
+    /* v0.9.1: the enlarged drawing lies on a sheet of the same sketchbook paper,
+       with a wide margin all round, like a mount in a frame */
+    .big .mat {
+      --m: clamp(1.2rem, 3.5vw, 3rem);              /* the paper margin around the drawing */
+      padding: var(--m);
+      background: #d9c79c url("images/paper-sketch.svg") center / cover;
+      box-shadow: 0 1.5rem 4rem rgba(0,0,0,0.75);
       transform: scale(0.95); transition: transform 0.25s ease;
     }
-    .big.open img { transform: scale(1); }
-    .big p { font-style: italic; font-size: 1.15rem; color: #bfe0f8; }
-    .big p span { font-style: normal; color: rgba(239,231,212,0.55); margin-left: 0.8rem; font-size: 0.95rem; }
+    .big.open .mat { transform: scale(1); }
+    .big img {
+      display: block; width: auto; height: auto;
+      max-width: calc(86vw - 2 * var(--m)); max-height: calc(84vh - 2 * var(--m));
+      box-shadow: 0 1px 4px rgba(60,40,20,0.45);   /* like a sheet lying on the paper */
+      cursor: zoom-out;
+    }
+    .big p { font-size: 0.95rem; color: rgba(239,231,212,0.55); }   /* just "3 / 18" */
     .big .nav, .big .x {
       position: absolute; border: 0; background: none; color: #efe7d4; cursor: pointer;
       font-family: "EB Garamond", serif; line-height: 1; opacity: 0.7; padding: 1rem;
@@ -100,6 +107,8 @@
     .big .prev { left: 1vw; }
     .big .next { right: 1vw; }
     .big .x { top: 0.5rem; right: 1vw; font-size: 2.4rem; }
+    .big button:focus { outline: none; }   /* no box around the × when the view opens */
+    .big button:focus-visible { outline: 1px solid rgba(239,231,212,0.4); }
 
     @media (max-width: 600px) {
       .version { display: none; }
@@ -111,7 +120,7 @@
 <body>
   <div class="wall"></div><div class="veil"></div>
   <nav class="topbar">
-    <div class="version">v0.9<span>27 Nov 2026</span></div>
+    <div class="version">v0.9.1<span>27 Nov 2026</span></div>
     <a href="index.html">music</a>
     <a href="drawings.html" aria-current="page">drawings</a>
     <a href="#">laziness</a>
@@ -124,7 +133,7 @@
   <div class="big" role="dialog" aria-modal="true" aria-label="Drawing" aria-hidden="true">
     <button class="x" aria-label="Close">&times;</button>
     <button class="nav prev" aria-label="Previous drawing">&lsaquo;</button>
-    <img src="" alt="">
+    <div class="mat"><img src="" alt=""></div>
     <p></p>
     <button class="nav next" aria-label="Next drawing">&rsaquo;</button>
   </div>
@@ -134,6 +143,11 @@
      here: ["file.jpg", "caption"]. They show in this order, newest first if you
      put new ones at the top. */
   var DRAWINGS = [
+    ["drawing-house-at-night.jpg",    "House at night"],
+    ["drawing-two-benches.jpg",       "Two benches in the park"],
+    ["drawing-bearded-face-words.jpg","Bearded face, with words"],
+    ["drawing-sleigh-in-snow.jpg",    "Sleigh in the snow"],
+    ["drawing-house-red-roof.jpg",    "House with a red roof"],
     ["drawing-trees-red-roofs.jpg",   "Trees and red roofs"],
     ["drawing-forest-path.jpg",       "Path through the trees"],
     ["drawing-chair-words.jpg",       "Chair, with words"],
@@ -175,9 +189,7 @@
       now = (i + DRAWINGS.length) % DRAWINGS.length;
       var d = DRAWINGS[now];
       bigImg.src = DIR + d[0]; bigImg.alt = "Drawing: " + d[1];
-      cap.textContent = d[1];
-      var n = document.createElement("span"); n.textContent = (now + 1) + " / " + DRAWINGS.length;
-      cap.appendChild(n);
+      cap.textContent = (now + 1) + " / " + DRAWINGS.length;   // no caption under the big drawing (v0.9.1)
       big.classList.add("open"); big.setAttribute("aria-hidden", "false");
       big.querySelector(".x").focus();
     }
@@ -189,7 +201,7 @@
     big.querySelector(".prev").addEventListener("click", function (e) { e.stopPropagation(); show(now - 1); });
     big.querySelector(".next").addEventListener("click", function (e) { e.stopPropagation(); show(now + 1); });
     big.querySelector(".x").addEventListener("click", close);
-    big.addEventListener("click", function (e) { if (e.target === big || e.target === bigImg) close(); });
+    big.addEventListener("click", function (e) { if (e.target === big || e.target === bigImg || e.target === bigImg.parentNode) close(); });
 
     document.addEventListener("keydown", function (e) {
       if (!big.classList.contains("open")) return;
