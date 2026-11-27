@@ -1,8 +1,9 @@
--- 002: fill Albums from the captions on the music page (407 albums, doubles merged).
+-- 002: fill Albums from the captions on the music page (480 albums, doubles merged).
 -- Made by tools/make-albums.py. Safe to run again: albums already in the table are skipped.
 
 INSERT INTO dbo.Albums (Artist, Album)
 SELECT v.Artist, v.Album FROM (VALUES
+    (N'ABBA', N'Voulez-Vous'),
     (N'AC/DC', N'''74 Jailbreak'),
     (N'AC/DC', N'Back in Black'),
     (N'AC/DC', N'Blow Up Your Video'),
@@ -14,6 +15,8 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'Aigues Vives', N'Water of Seasons'),
     (N'Air', N'Talkie Walkie'),
     (N'Al Di Meola', N'Elegant Gypsy'),
+    (N'Al Di Meola', N'Land of the Midnight Sun'),
+    (N'Al Di Meola, John McLaughlin, Paco de Lucía', N'Friday Night in San Francisco'),
     (N'Alameda', N'Alameda'),
     (N'Alexandru Andrieș', N'Rock''n''roll'),
     (N'Alquin', N'3 Originals'),
@@ -31,6 +34,7 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'Bachelor of Hearts', N'On the Boulevard'),
     (N'Balkan Taksim', N'Disko Telegraf'),
     (N'Banzai', N'Hora Nata'),
+    (N'Bega Blues Band', N'Concert aniversar 40 de ani'),
     (N'Beggars Opera', N'Waters of Change'),
     (N'Birth Control', N'Hoodoo Man'),
     (N'Björk', N'Debut'),
@@ -79,6 +83,7 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'Czerwone Gitary', N'Na fujarce'),
     (N'Czesław Niemen', N'Enigmatic'),
     (N'Czesław Niemen', N'Idée Fixe'),
+    (N'Daevid Allen', N'Banana Moon'),
     (N'Daevid Allen', N'Now Is the Happiest Time of Your Life'),
     (N'Darryl Way''s Wolf', N'Canis Lupus'),
     (N'Darryl Way''s Wolf', N'Night Music'),
@@ -86,6 +91,7 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'David Bowie', N'The Man Who Sold the World'),
     (N'David Byrne & Brian Eno', N'Everything That Happens Will Happen Today'),
     (N'Deep Purple', N'Made in Europe'),
+    (N'Deep Purple', N'Made in Japan'),
     (N'Dies Irae', N'First'),
     (N'Dire Straits', N'Dire Straits'),
     (N'Doctors of Madness', N'Late Night Movies, All Night Brainstorms'),
@@ -111,11 +117,15 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'Epitaph', N'Stop, Look and Listen'),
     (N'Eroc', N'Eroc'),
     (N'Eroc', N'Eroc 3'),
+    (N'Eurythmics', N'In the Garden'),
     (N'Experimental Q2', N'Reflux'),
     (N'Family', N'Anyway...'),
     (N'Family', N'Music in a Doll''s House'),
     (N'Faust', N'So Far'),
     (N'Faust', N'Tapes'),
+    (N'FFN', N'Un joc'),
+    (N'FFN', N'Zece pași'),
+    (N'FFN', N'Zi cu zi'),
     (N'Fish', N'Sunsets on Empire'),
     (N'Fish', N'Vigil in a Wilderness of Mirrors'),
     (N'Flairck', N'The Lady''s Back'),
@@ -139,11 +149,24 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'Gentle Giant', N'Gentle Giant'),
     (N'Gnidrolog', N'...In Spite of Harry''s Toe-Nail'),
     (N'Gnidrolog', N'Lady Lake'),
+    (N'Golden Earring', N'Together'),
     (N'Gong', N'2032'),
+    (N'Gong', N'Angel''s Egg'),
+    (N'Gong', N'Camembert Électrique')
+) AS v(Artist, Album)
+WHERE NOT EXISTS (SELECT 1 FROM dbo.Albums a WHERE a.Artist = v.Artist AND a.Album = v.Album);
+
+INSERT INTO dbo.Albums (Artist, Album)
+SELECT v.Artist, v.Album FROM (VALUES
+    (N'Gong', N'Flying Teapot'),
     (N'Gong', N'Gazeuse!'),
     (N'Gong', N'Gong est mort, vive Gong'),
     (N'Gong', N'I See You'),
+    (N'Gong', N'Live Etc.'),
     (N'Gong', N'Magick Brother'),
+    (N'Gong', N'Rejoice! I''m Dead!'),
+    (N'Gong', N'Shamal'),
+    (N'Gong', N'You'),
     (N'Gong', N'Zero to Infinity'),
     (N'Grateful Dead', N'Blues for Allah'),
     (N'Gravy Train', N'Gravy Train'),
@@ -152,16 +175,12 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'Guru Guru', N'Hinten'),
     (N'Guru Guru', N'Tango Fango'),
     (N'Guru Guru', N'This Is Guru Guru'),
-    (N'Guru Guru', N'UFO')
-) AS v(Artist, Album)
-WHERE NOT EXISTS (SELECT 1 FROM dbo.Albums a WHERE a.Artist = v.Artist AND a.Album = v.Album);
-
-INSERT INTO dbo.Albums (Artist, Album)
-SELECT v.Artist, v.Album FROM (VALUES
+    (N'Guru Guru', N'UFO'),
     (N'Harvey Mandel', N'The Snake'),
     (N'Hatfield and the North', N'Hatfield and the North'),
     (N'Hatfield and the North', N'The Rotters'' Club'),
     (N'Hawkwind', N'Masters of the Universe'),
+    (N'Hen Ogledd', N'Free Humans'),
     (N'Henry Cow', N'In Praise of Learning'),
     (N'Henry Cow', N'Legend'),
     (N'Holger Czukay, Jah Wobble, Jaki Liebezeit', N'Full Circle'),
@@ -169,7 +188,14 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'Hölderlin', N'Hölderlins Traum'),
     (N'Ian Anderson', N'Plays the Orchestral Jethro Tull'),
     (N'Ian Anderson', N'The Secret Language of Birds'),
+    (N'Implant pentru Refuz', N'Cartography'),
+    (N'Ioan Gyuri Pascu', N'12 ani, 12 balade'),
+    (N'Ioan Gyuri Pascu', N'Gânduri nevinovate'),
+    (N'Ioan Gyuri Pascu', N'Jocul de-a joaca'),
+    (N'Ioan Gyuri Pascu', N'La jumătatea vieții'),
     (N'Ioan Gyuri Pascu', N'Mașina cu jazzolină'),
+    (N'Ioan Gyuri Pascu', N'Prinde o stea'),
+    (N'Ioan Gyuri Pascu', N'Stângul de a visa'),
     (N'Iris', N'Iris IV'),
     (N'Iris', N'Nu te opri!'),
     (N'Iron Butterfly', N'In-A-Gadda-Da-Vida'),
@@ -191,6 +217,7 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'Jethro Tull', N'RökFlöte'),
     (N'Jethro Tull', N'Stormwatch'),
     (N'Jethro Tull', N'The Zealot Gene'),
+    (N'Jethro Tull', N'Thick as a Brick'),
     (N'Joe Walsh', N'But Seriously, Folks...'),
     (N'Joe Zawinul', N'Faces & Places'),
     (N'John Lennon', N'Imagine'),
@@ -218,9 +245,14 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'Kevin Ayers', N'Sweet Deceiver'),
     (N'Kevin Coyne', N'Politicz'),
     (N'Khan', N'Space Shanty'),
+    (N'King Crimson', N'Beat'),
+    (N'King Crimson', N'In the Court of the Crimson King'),
     (N'King Crimson', N'In the Wake of Poseidon'),
     (N'King Crimson', N'Larks'' Tongues in Aspic'),
     (N'King Crimson', N'Lizard'),
+    (N'King Crimson', N'Red'),
+    (N'King Crimson', N'Starless and Bible Black'),
+    (N'King Crimson', N'USA'),
     (N'KISS', N'Music from The Elder'),
     (N'KISS', N'Unmasked'),
     (N'Kraan', N'Live'),
@@ -238,6 +270,7 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'Mahavishnu Orchestra', N'Birds of Fire'),
     (N'Manowar', N'Kings of Metal'),
     (N'Manuel Göttsching', N'E2-E4'),
+    (N'Marina Voica & Mircea Baniciu', N'Tu vei rămâne tu / Săptămâna'),
     (N'Mark Knopfler', N'Sailing to Philadelphia'),
     (N'Mark-Almond', N'Mark-Almond II'),
     (N'Masters of Reality', N'Masters of Reality'),
@@ -249,7 +282,9 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'Miles Davis', N'Seven Steps to Heaven'),
     (N'Moebius & Plank', N'Rastakraut Pasta'),
     (N'Molly Hatchet', N'Molly Hatchet'),
+    (N'Mondial', N'Romanță fără ecou'),
     (N'Morrissey', N'You Are the Quarry'),
+    (N'Mother Gong', N'Robot Woman'),
     (N'Mountain', N'Twin Peaks'),
     (N'Moving Gelatine Plates', N'The World of Genius Hans'),
     (N'Mythos', N'Concrete City'),
@@ -261,12 +296,35 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'Nicu Alifantis', N'După melci'),
     (N'Niemen', N'Niemen'),
     (N'Niemen i Akwarele', N'Sukces'),
+    (N'Novalis', N'Banished Bridge'),
     (N'Novalis', N'Brandung'),
+    (N'Novalis', N'Flossenengel'),
     (N'Novalis', N'Novalis'),
+    (N'Novalis', N'Sommerabend'),
     (N'Nucleus', N'Elastic Rock'),
+    (N'Nuevo Tango Quintet', N'AniverTango'),
     (N'October', N'After the Fall'),
     (N'Olympic', N'V Lucerně'),
+    (N'Omega', N'1968–1973'),
+    (N'Omega', N'A föld árnyékos oldalán'),
+    (N'Omega', N'Az arc')
+) AS v(Artist, Album)
+WHERE NOT EXISTS (SELECT 1 FROM dbo.Albums a WHERE a.Artist = v.Artist AND a.Album = v.Album);
+
+INSERT INTO dbo.Albums (Artist, Album)
+SELECT v.Artist, v.Album FROM (VALUES
+    (N'Omega', N'Babylon'),
+    (N'Omega', N'Csillagok útján'),
+    (N'Omega', N'Gammapolis'),
+    (N'Omega', N'Időrabló'),
+    (N'Omega', N'Nem tudom a neved'),
     (N'Omega', N'Omega'),
+    (N'Omega', N'Omega 5'),
+    (N'Omega', N'Omega XI'),
+    (N'Omega', N'On Tour'),
+    (N'Omega', N'The Hall of Floaters in the Sky'),
+    (N'Omega', N'Éjszakai országút'),
+    (N'Omega', N'Élő Omega Kisstadion ''80'),
     (N'Opus', N'Live Is Life'),
     (N'Opus Avantra', N'Lord Cromwell Plays Suite for Seven Vices'),
     (N'Opus Avantra', N'Strata'),
@@ -298,8 +356,11 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'Phil Manzanera', N'Vozero'),
     (N'Philip Lynott', N'Solo in Soho'),
     (N'Philip Lynott', N'The Philip Lynott Album'),
+    (N'Phoenix', N'Ciocârlia / Perestroika'),
+    (N'Phoenix', N'Mamă, mamă'),
     (N'Phoenix', N'Transsylvania'),
     (N'Pierre Moerlen''s Gong', N'Downwind'),
+    (N'Pierre Moerlen''s Gong', N'Time Is the Key'),
     (N'Pink Floyd', N'Animals'),
     (N'Pink Floyd', N'Atom Heart Mother'),
     (N'Pink Floyd', N'The Dark Side of the Moon'),
@@ -307,12 +368,7 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'Potemkine', N'Triton'),
     (N'Pró Musica', N'Pró Musica'),
     (N'Queen', N'Live in Vienna, Austria, July 21, 1986'),
-    (N'Quicksand', N'Home Is Where I Belong')
-) AS v(Artist, Album)
-WHERE NOT EXISTS (SELECT 1 FROM dbo.Albums a WHERE a.Artist = v.Artist AND a.Album = v.Album);
-
-INSERT INTO dbo.Albums (Artist, Album)
-SELECT v.Artist, v.Album FROM (VALUES
+    (N'Quicksand', N'Home Is Where I Belong'),
     (N'Rainbow', N'Rising'),
     (N'Return to Forever', N'Romantic Warrior'),
     (N'Rezident EX', N'Alpha'),
@@ -338,8 +394,10 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'Smak', N'Zašto ne volim sneg'),
     (N'Soft Heap', N'Soft Heap'),
     (N'Soft Machine', N'5'),
+    (N'Soft Machine', N'Fourth'),
     (N'Soft Machine', N'Seven'),
     (N'Soft Machine', N'Softs'),
+    (N'Soft Machine', N'Third'),
     (N'Solaris', N'Marsbéli krónikák'),
     (N'Spirit', N'Farther Along'),
     (N'Spirit', N'Twelve Dreams of Dr. Sardonicus'),
@@ -365,6 +423,7 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'The Enid', N'In the Region of the Summer Stars'),
     (N'The Flock', N'Dinosaur Swamps'),
     (N'The Go-Betweens', N'Liberty Belle and the Black Diamond Express'),
+    (N'The Incredible String Band', N'The 5000 Spirits or the Layers of the Onion'),
     (N'The London Symphony Orchestra & Ian Anderson', N'A Classic Case'),
     (N'The Moody Blues', N'A Question of Balance'),
     (N'The Moody Blues', N'Days of Future Passed'),
@@ -403,7 +462,15 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'Univers Zero', N'Phosphorescent Dreams'),
     (N'Unknown', N'Experimental'),
     (N'Uriah Heep', N'Live in Europe 1979'),
-    (N'Uriah Heep', N'The Best of Uriah Heep'),
+    (N'Uriah Heep', N'The Best of Uriah Heep')
+) AS v(Artist, Album)
+WHERE NOT EXISTS (SELECT 1 FROM dbo.Albums a WHERE a.Artist = v.Artist AND a.Album = v.Album);
+
+INSERT INTO dbo.Albums (Artist, Album)
+SELECT v.Artist, v.Album FROM (VALUES
+    (N'Valeriu Sterian', N'Evenimentul zilei... și altele'),
+    (N'Valeriu Sterian și Compania de Sunet', N'Antirăzboinică'),
+    (N'Valeriu Sterian și Compania de Sunet', N'S-a votat Codul penal'),
     (N'Valeriu Sterian și Compania de Sunet', N'Vino, Doamne!'),
     (N'Van der Graaf Generator', N'Godbluff'),
     (N'Van der Graaf Generator', N'H to He, Who Am the Only One'),
@@ -413,11 +480,22 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'Wallenstein', N'Charline'),
     (N'Wallenstein', N'Stories, Songs & Symphonies'),
     (N'Wapassou', N'Salammbô'),
+    (N'Weather Report', N'Heavy Weather'),
+    (N'Weather Report', N'I Sing the Body Electric'),
+    (N'Weather Report', N'Mr. Gone'),
+    (N'Weather Report', N'Mysterious Traveller'),
+    (N'Weather Report', N'Night Passage'),
+    (N'Weather Report', N'Sportin'' Life'),
+    (N'Weather Report', N'Sweetnighter'),
+    (N'Weather Report', N'Tale Spinnin'''),
+    (N'Weather Report', N'Weather Report (1971)'),
+    (N'Weather Report', N'Weather Report (1982)'),
     (N'Whitesnake', N'Ready an'' Willing'),
     (N'Wigwam', N'Being'),
     (N'Wigwam', N'Fairyport'),
     (N'Wishbone Ash', N'Argus'),
     (N'Wyatt, Atzmon, Stephen', N'...for the ghosts within'),
+    (N'Yes', N'Going for the One'),
     (N'Yusuf', N'An Other Cup'),
     (N'Yusuf', N'Roadsinger')
 ) AS v(Artist, Album)
