@@ -117,7 +117,7 @@
 </head>
 <body>
   <nav class="topbar">
-    <div class="version">v0.9.3<span>27 Nov 2026</span></div>
+    <div class="version">v0.9.4<span>27 Nov 2026</span></div>
     <a href="index.html">music</a>
     <a href="drawings.html" aria-current="page">drawings</a>
     <a href="#">laziness</a>
@@ -138,6 +138,35 @@
      here: ["file.jpg", "caption"]. They show in this order, newest first if you
      put new ones at the top. */
   var DRAWINGS = [
+    ["drawing-still-life-ink.jpg",         "Still life in ink"],
+    ["drawing-man-in-wide-hat.jpg",        "Man in a wide hat"],
+    ["drawing-man-at-bar.jpg",             "Man at the bar"],
+    ["drawing-street-with-lamp.jpg",       "Street with a lamp post"],
+    ["drawing-pencil-storm-face.jpg",      "Face in a pencil storm"],
+    ["drawing-four-with-guitars.jpg",      "Four of them, with guitars"],
+    ["drawing-head-bent-down.jpg",         "Head bent down"],
+    ["drawing-lone-tree-field.jpg",        "Lone tree in a field"],
+    ["drawing-at-the-table.jpg",           "At the table"],
+    ["drawing-green-lamp-room.jpg",        "Room with a lamp, in green"],
+    ["drawing-garden-table.jpg",           "Table in the garden"],
+    ["drawing-after-degas-tub.jpg",        "Study after Degas, The Tub"],
+    ["drawing-after-van-gogh-boats.jpg",   "Study after Van Gogh, boats on the beach"],
+    ["drawing-old-face-pencil.jpg",        "Old face, pencil"],
+    ["drawing-after-monet-parasol.jpg",    "Study after Monet, woman with a parasol"],
+    ["drawing-house-through-trees.jpg",    "House through the trees"],
+    ["drawing-snowy-barn.jpg",             "Barn in the snow"],
+    ["drawing-face-close-up.jpg",          "Face, close up"],
+    ["drawing-night-window.jpg",           "By the window at night"],
+    ["drawing-blue-pen-face.jpg",          "Face in blue pen"],
+    ["drawing-face-in-shadow.jpg",         "Face in shadow"],
+    ["drawing-walk-with-child.jpg",        "Walk with a child"],
+    ["drawing-red-and-words.jpg",          "Red, with words"],
+    ["drawing-scribble-hand.jpg",          "Scribbles and a hand"],
+    ["drawing-two-trees-framed.jpg",       "Two trees"],
+    ["drawing-bearded-man-cap.jpg",        "Bearded man in a cap"],
+    ["drawing-seated-with-stick.jpg",      "Seated, with a stick"],
+    ["drawing-tree-and-hills.jpg",         "Tree and hills"],
+    ["drawing-village-street.jpg",         "Village street"],
     ["drawing-figures-with-words.jpg",     "Figures, with words"],
     ["drawing-house-by-the-rails.jpg",     "House by the railway"],
     ["drawing-colour-group-lettering.jpg", "Group in the green, with lettering"],
@@ -175,6 +204,8 @@
     ["drawing-guitar-man.jpg",        "Man with guitar"]
   ];
   var DIR = "images/drawings/";
+  /* the grid shows small previews from images/drawings/thumbs/ (made by tools/make-thumbs.py);
+     the enlarged view loads the full-size drawing */
 
   (function () {
     var sheet = document.querySelector(".sheet");
@@ -187,7 +218,7 @@
       var b = document.createElement("button");
       b.setAttribute("aria-label", "See big: " + d[1]);
       var img = document.createElement("img");
-      img.src = DIR + d[0]; img.alt = "Drawing: " + d[1]; img.loading = "lazy";
+      img.src = DIR + "thumbs/" + d[0]; img.alt = "Drawing: " + d[1]; img.loading = "lazy";
       b.appendChild(img);
       b.addEventListener("click", function () { opener = b; show(i); });
       sheet.appendChild(b);
