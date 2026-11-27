@@ -37,6 +37,20 @@
     }
     .topbar a:hover { background: #1c2a1e; color: #fff; }
     .topbar a[aria-current="page"] { background: #5fb36a; color: #07140a; }
+    /* v0.9.8: "music" opens a small menu - covers / list of albums */
+    .topbar .menu { position: relative; align-self: stretch; display: flex; }
+    .topbar .menu.here > a { background: #5fb36a; color: #07140a; }
+    .topbar .sub {
+      display: none; position: absolute; top: calc(100% + 2px); left: 0; min-width: 14rem;
+      flex-direction: column; background: #000; border: 1px solid #5fb36a; border-top: 0;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.6);
+    }
+    .topbar .menu:hover .sub, .topbar .menu:focus-within .sub, .topbar .menu.open .sub { display: flex; }
+    .topbar .sub a { height: 3rem; font-size: 1.25rem; white-space: nowrap; padding: 0 1.2rem;
+      border-top: 1px solid rgba(239,231,212,0.15); }
+    .topbar .sub a:first-child { border-top: 0; }
+    .topbar .sub a[aria-current="page"] { background: none; color: #6fc47a; }
+    .topbar .sub a[aria-current="page"]::after { content: "•"; margin-left: auto; padding-left: 1rem; }
     .version {
       position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%);
       font-family: "Cinzel", serif; font-size: 0.95rem; font-weight: 600; letter-spacing: 0.12em; color: #6fc47a;
@@ -70,6 +84,8 @@
       font-family: "Cinzel", serif; font-size: 1.6rem; color: #6fc47a; margin: 0.4rem 0 0.4rem;
       break-after: avoid;
     }
+    .wip { max-width: 1200px; margin: -1.6vh auto 3.2vh; font-style: italic; font-size: 1.02rem;
+      color: rgba(239,231,212,0.62); }
     .empty { margin-top: 4vh; font-size: 1.2rem; color: rgba(239,231,212,0.6); }
 
     @media (max-width: 600px) {
@@ -80,8 +96,14 @@
 </head>
 <body>
   <nav class="topbar">
-    <div class="version">v0.9.7<span>27 Nov 2026</span></div>
-    <a href="index.html" aria-current="page">music</a>
+    <div class="version">v0.9.8<span>27 Nov 2026</span></div>
+    <div class="menu here">
+      <a href="index.html" aria-haspopup="true">music</a>
+      <div class="sub">
+        <a href="index.html">covers</a>
+        <a href="albums.html" aria-current="page">list of albums</a>
+      </div>
+    </div>
     <a href="drawings.html">drawings</a>
     <a href="#">laziness</a>
   </nav>
@@ -90,6 +112,7 @@
     <input type="search" placeholder="search artist or album" aria-label="Search albums">
     <span class="count">waking up the record shelf…</span>
   </div>
+  <p class="wip">work in progress – the shelf is still being photographed, more albums are added as they come off it</p>
   <div class="list"></div>
 
   <script>
@@ -151,7 +174,7 @@
       });
       if (!shown.length) list.appendChild(el("p", "empty", "nothing on the shelf matches that"));
 
-      count.textContent = (q ? shown.length + " of " : "") + albums.length + " albums · " + artists.length + (artists.length === 1 ? " artist" : " artists");
+      count.textContent = (q ? shown.length + " of " : "") + albums.length + " albums so far · " + artists.length + (artists.length === 1 ? " artist" : " artists");
       count.appendChild(el("small", "", source));
     }
 
@@ -170,6 +193,19 @@
       });
 
     search.addEventListener("input", show);
+  })();
+  </script>
+  <script>
+  /* v0.9.8: on touch screens the first tap on "music" opens its menu, the second follows the link */
+  (function () {
+    document.querySelectorAll(".topbar .menu").forEach(function (m) {
+      m.querySelector("a").addEventListener("click", function (e) {
+        if (window.matchMedia("(hover: none)").matches && !m.classList.contains("open")) {
+          e.preventDefault(); m.classList.add("open");
+        }
+      });
+      document.addEventListener("click", function (e) { if (!m.contains(e.target)) m.classList.remove("open"); });
+    });
   })();
   </script>
 </body>
