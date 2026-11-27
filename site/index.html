@@ -214,6 +214,9 @@
       box-shadow: 0 1px 3px rgba(60, 40, 20, 0.35);   /* like sheets lying on the paper */
     }
 
+    .drawings a { display: block; height: 100%; }   /* v0.9: each drawing opens the drawings page */
+    .drawings li { transition: transform 0.2s ease; }
+    .drawings li:hover { transform: translateY(-3px) rotate(-0.8deg); }
     .drawings img {
       display: block;
       height: 100%;
@@ -325,9 +328,9 @@
 <body>
   <div class="wall"></div><div class="veil"></div>
   <nav class="topbar">
-    <div class="version">v0.8<span>24 Nov 2026</span></div>
-    <a href="/" aria-current="page">music</a>
-    <a href="#">drawings</a>
+    <div class="version">v0.9<span>27 Nov 2026</span></div>
+    <a href="index.html" aria-current="page">music</a>
+    <a href="drawings.html">drawings</a>
     <a href="#">laziness</a>
   </nav>
   <h1 class="name" aria-label="eNTckidu"><span class="e">e</span><span class="nt">NT</span><span class="c">c</span><span class="k">k</span>id<span class="u">u</span></h1>
@@ -897,15 +900,15 @@
   })();
   </script>
   <ul class="drawings">
-    <li><img src="images/drawings/drawing-face.jpg" alt="Drawing: portrait of a man"></li>
-    <li class="wide"><img src="images/drawings/drawing-bassist.jpg" alt="Drawing: bass player in sunglasses"></li>
-    <li><img src="images/drawings/drawing-celelalte-cuvinte.jpg" alt="Drawing: Celelalte Cuvinte"></li>
-    <li><img src="images/drawings/drawing-harmonica.jpg" alt="Drawing: musician in profile"></li>
-    <li><img src="images/drawings/drawing-beard.jpg" alt="Drawing: bearded man"></li>
-    <li class="wide"><img src="images/drawings/drawing-pianist.jpg" alt="Drawing: musician at the keys"></li>
-    <li class="wide"><img src="images/drawings/drawing-wild-hair.jpg" alt="Drawing: head with wild hair"></li>
-    <li><img src="images/drawings/drawing-long-hair.jpg" alt="Drawing: long-haired face"></li>
-    <li><img src="images/drawings/drawing-guitar-man.jpg" alt="Drawing: man with guitar"></li>
+    <li><a href="drawings.html#drawing-face.jpg" title="See it on the drawings page"><img src="images/drawings/drawing-face.jpg" alt="Drawing: portrait of a man"></a></li>
+    <li class="wide"><a href="drawings.html#drawing-bassist.jpg" title="See it on the drawings page"><img src="images/drawings/drawing-bassist.jpg" alt="Drawing: bass player in sunglasses"></a></li>
+    <li><a href="drawings.html#drawing-celelalte-cuvinte.jpg" title="See it on the drawings page"><img src="images/drawings/drawing-celelalte-cuvinte.jpg" alt="Drawing: Celelalte Cuvinte"></a></li>
+    <li><a href="drawings.html#drawing-harmonica.jpg" title="See it on the drawings page"><img src="images/drawings/drawing-harmonica.jpg" alt="Drawing: musician in profile"></a></li>
+    <li><a href="drawings.html#drawing-beard.jpg" title="See it on the drawings page"><img src="images/drawings/drawing-beard.jpg" alt="Drawing: bearded man"></a></li>
+    <li class="wide"><a href="drawings.html#drawing-pianist.jpg" title="See it on the drawings page"><img src="images/drawings/drawing-pianist.jpg" alt="Drawing: musician at the keys"></a></li>
+    <li class="wide"><a href="drawings.html#drawing-wild-hair.jpg" title="See it on the drawings page"><img src="images/drawings/drawing-wild-hair.jpg" alt="Drawing: head with wild hair"></a></li>
+    <li><a href="drawings.html#drawing-long-hair.jpg" title="See it on the drawings page"><img src="images/drawings/drawing-long-hair.jpg" alt="Drawing: long-haired face"></a></li>
+    <li><a href="drawings.html#drawing-guitar-man.jpg" title="See it on the drawings page"><img src="images/drawings/drawing-guitar-man.jpg" alt="Drawing: man with guitar"></a></li>
   </ul>
 
   <!-- enlarged record: opens when a record is clicked -->

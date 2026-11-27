@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>eNTckidu · drawings</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b1d45'/%3E%3Ctext x='32' y='49' text-anchor='middle' font-family='Cormorant Garamond,Garamond,Georgia,serif' font-weight='700' font-size='70' fill='%23efe7d4'%3Ee%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;800&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { background: #06122d; }
+    body {
+      min-height: 100vh;
+      padding: calc(3.2rem + 5vh) 5vw 8vh;      /* room for the header bar */
+      color: #efe7d4; text-align: center;
+      font-family: "EB Garamond", Garamond, Georgia, serif;
+    }
+
+    /* the same wall of covers as the music page, but darker so the drawings come first */
+    .wall {
+      position: fixed; inset: 0; z-index: -2;
+      background: url("images/wall.jpg") 0 0 / calc(15 * 104px) auto repeat;
+      filter: saturate(0.7) brightness(0.42);
+    }
+    .veil { position: fixed; inset: 0; z-index: -1; background: rgba(6,18,45,0.35); }
+
+    /* header bar - same as index.html */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 5;
+      height: 3.2rem; display: flex; align-items: center; justify-content: center;
+      gap: clamp(1.5rem, 5vw, 4rem);
+      background: #000; border-bottom: 2px solid #5fb36a;
+    }
+    .topbar a {
+      font-family: "EB Garamond", Garamond, serif; font-size: 1.4rem; font-weight: 500; letter-spacing: 0.07em;
+      color: #e6dcc4; text-decoration: none; padding: 0.2rem 0.1rem;
+    }
+    .topbar a:hover, .topbar a[aria-current="page"] { color: #fff; }
+    .topbar a[aria-current="page"] { border-bottom: 2px solid #5fb36a; }
+    .version {
+      position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%);
+      font-family: "Cinzel", serif; font-size: 0.95rem; font-weight: 600; letter-spacing: 0.12em; color: #6fc47a;
+    }
+    .version span {
+      margin-left: 0.6rem; font-family: "EB Garamond", serif; font-weight: 400; font-size: 1rem;
+      letter-spacing: 0.04em; color: rgba(239,231,212,0.75);
+    }
+
+    h1 {
+      font-family: "Cinzel", serif; font-weight: 600; letter-spacing: 0.08em;
+      font-size: clamp(2rem, 6vw, 4.2rem); line-height: 1;
+      text-shadow: 0 2px 18px rgba(0,0,0,0.85);
+    }
+    .intro { margin: 0.8rem 0 4vh; font-size: clamp(1rem, 1.6vw, 1.3rem); color: #bfe0f8;
+      text-shadow: 0 1px 8px rgba(0,0,0,0.9); }
+
+    /* the drawings lie on a big sheet of sketchbook paper, in columns,
+       each drawing keeps its own shape */
+    .sheet {
+      max-width: 1200px; margin: 0 auto;
+      padding: clamp(0.8rem, 2vw, 1.6rem);
+      background: #d9c79c url("images/paper-sketch.svg") center / cover;
+      box-shadow: 0 1rem 3rem rgba(0,0,0,0.55);
+      columns: 3 260px; column-gap: clamp(0.8rem, 2vw, 1.6rem);
+    }
+    .sheet button {
+      display: block; width: 100%; margin: 0 0 clamp(0.8rem, 2vw, 1.6rem);
+      break-inside: avoid; border: 0; padding: 0; background: none; cursor: zoom-in;
+      box-shadow: 0 1px 4px rgba(60,40,20,0.4);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .sheet button:hover { transform: rotate(-0.6deg) scale(1.02); box-shadow: 0 0.6rem 1.4rem rgba(60,40,20,0.45); }
+    .sheet button:focus-visible { outline: 3px solid #0b1d45; outline-offset: 3px; }
+    .sheet img { display: block; width: 100%; height: auto; }
+
+    /* enlarged drawing */
+    .big {
+      position: fixed; inset: 0; z-index: 10;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem;
+      padding: 4vh 4vw; background: rgba(4,11,28,0.96);
+      opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0.25s;
+    }
+    .big.open { opacity: 1; visibility: visible; }
+    .big img {
+      max-width: 88vw; max-height: 80vh; width: auto; height: auto;
+      box-shadow: 0 1.5rem 4rem rgba(0,0,0,0.7); cursor: zoom-out;
+      transform: scale(0.95); transition: transform 0.25s ease;
+    }
+    .big.open img { transform: scale(1); }
+    .big p { font-style: italic; font-size: 1.15rem; color: #bfe0f8; }
+    .big p span { font-style: normal; color: rgba(239,231,212,0.55); margin-left: 0.8rem; font-size: 0.95rem; }
+    .big .nav, .big .x {
+      position: absolute; border: 0; background: none; color: #efe7d4; cursor: pointer;
+      font-family: "EB Garamond", serif; line-height: 1; opacity: 0.7; padding: 1rem;
+    }
+    .big .nav:hover, .big .x:hover { opacity: 1; }
+    .big .nav { top: 50%; transform: translateY(-50%); font-size: 3.5rem; }
+    .big .prev { left: 1vw; }
+    .big .next { right: 1vw; }
+    .big .x { top: 0.5rem; right: 1vw; font-size: 2.4rem; }
+
+    @media (max-width: 600px) {
+      .version { display: none; }
+      .sheet { columns: 2 120px; }
+      .big .nav { font-size: 2.6rem; padding: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wall"></div><div class="veil"></div>
+  <nav class="topbar">
+    <div class="version">v0.9<span>27 Nov 2026</span></div>
+    <a href="index.html">music</a>
+    <a href="drawings.html" aria-current="page">drawings</a>
+    <a href="#">laziness</a>
+  </nav>
+
+  <h1>drawings</h1>
+  <p class="intro">click a drawing to see it big</p>
+  <div class="sheet"></div>
+
+  <div class="big" role="dialog" aria-modal="true" aria-label="Drawing" aria-hidden="true">
+    <button class="x" aria-label="Close">&times;</button>
+    <button class="nav prev" aria-label="Previous drawing">&lsaquo;</button>
+    <img src="" alt="">
+    <p></p>
+    <button class="nav next" aria-label="Next drawing">&rsaquo;</button>
+  </div>
+
+  <script>
+  /* THE DRAWINGS - to add one: put the picture in images/drawings/ and add a line
+     here: ["file.jpg", "caption"]. They show in this order, newest first if you
+     put new ones at the top. */
+  var DRAWINGS = [
+    ["drawing-trees-red-roofs.jpg",   "Trees and red roofs"],
+    ["drawing-forest-path.jpg",       "Path through the trees"],
+    ["drawing-chair-words.jpg",       "Chair, with words"],
+    ["drawing-two-trees-road.jpg",    "Two trees by a country road"],
+    ["drawing-musicians-ink.jpg",     "Musicians playing"],
+    ["drawing-two-women-street.jpg",  "Two women in the street"],
+    ["drawing-old-man-stripes.jpg",   "Old man in a striped shirt"],
+    ["drawing-band-of-five.jpg",      "Group of five"],
+    ["drawing-face.jpg",              "Portrait of a man"],
+    ["drawing-bassist.jpg",           "Bass player in sunglasses"],
+    ["drawing-celelalte-cuvinte.jpg", "Celelalte Cuvinte"],
+    ["drawing-harmonica.jpg",         "Musician in profile"],
+    ["drawing-beard.jpg",             "Bearded man"],
+    ["drawing-pianist.jpg",           "Musician at the keys"],
+    ["drawing-wild-hair.jpg",         "Head with wild hair"],
+    ["drawing-long-hair.jpg",         "Long-haired face"],
+    ["drawing-guitar-man.jpg",        "Man with guitar"]
+  ];
+  var DIR = "images/drawings/";
+
+  (function () {
+    var sheet = document.querySelector(".sheet");
+    var big = document.querySelector(".big");
+    var bigImg = big.querySelector("img");
+    var cap = big.querySelector("p");
+    var now = 0, opener = null;
+
+    DRAWINGS.forEach(function (d, i) {
+      var b = document.createElement("button");
+      b.setAttribute("aria-label", "See big: " + d[1]);
+      var img = document.createElement("img");
+      img.src = DIR + d[0]; img.alt = "Drawing: " + d[1]; img.loading = "lazy";
+      b.appendChild(img);
+      b.addEventListener("click", function () { opener = b; show(i); });
+      sheet.appendChild(b);
+    });
+
+    function show(i) {
+      now = (i + DRAWINGS.length) % DRAWINGS.length;
+      var d = DRAWINGS[now];
+      bigImg.src = DIR + d[0]; bigImg.alt = "Drawing: " + d[1];
+      cap.textContent = d[1];
+      var n = document.createElement("span"); n.textContent = (now + 1) + " / " + DRAWINGS.length;
+      cap.appendChild(n);
+      big.classList.add("open"); big.setAttribute("aria-hidden", "false");
+      big.querySelector(".x").focus();
+    }
+    function close() {
+      big.classList.remove("open"); big.setAttribute("aria-hidden", "true");
+      if (opener) opener.focus();
+    }
+
+    big.querySelector(".prev").addEventListener("click", function (e) { e.stopPropagation(); show(now - 1); });
+    big.querySelector(".next").addEventListener("click", function (e) { e.stopPropagation(); show(now + 1); });
+    big.querySelector(".x").addEventListener("click", close);
+    big.addEventListener("click", function (e) { if (e.target === big || e.target === bigImg) close(); });
+
+    document.addEventListener("keydown", function (e) {
+      if (!big.classList.contains("open")) return;
+      if (e.key === "Escape") close();
+      if (e.key === "ArrowLeft") show(now - 1);
+      if (e.key === "ArrowRight") show(now + 1);
+    });
+
+    // coming from the music page (drawings.html#file.jpg): open that drawing straight away
+    var want = decodeURIComponent(location.hash.slice(1));
+    if (want) DRAWINGS.forEach(function (d, i) { if (d[0] === want) show(i); });
+
+    // phones: swipe left / right to move between drawings
+    var x0 = null;
+    big.addEventListener("touchstart", function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+    big.addEventListener("touchend", function (e) {
+      if (x0 === null) return;
+      var dx = e.changedTouches[0].clientX - x0; x0 = null;
+      if (Math.abs(dx) > 50) show(now + (dx < 0 ? 1 : -1));
+    });
+  })();
+  </script>
+</body>
+</html>
