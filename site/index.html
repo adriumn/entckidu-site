@@ -376,17 +376,30 @@
     sprite.forEach(function (f, k) { if (!(f in at)) at[f] = k; });
     var files = Object.keys(at);
 
-    // shuffle (Fisher-Yates); the featured cover and the clicks read WALL.cells after this
-    var cells = sprite.slice();
-    for (var i = cells.length - 1; i > 0; i--) {
-      var j = Math.floor(Math.random() * (i + 1)), t = cells[i]; cells[i] = cells[j]; cells[j] = t;
+    // v0.9.9: the wall is built as wide as the screen, so it never has to repeat sideways.
+    // wall.jpg keeps its own 15-column layout (SPRITE_COLS); WALL.cols / WALL.rows become
+    // the size of the wall on screen, which the featured cover, swaps and clicks all read.
+    var SPRITE_COLS = WALL.cols, SPRITE_ROWS = WALL.rows;
+    var wide = Math.max(innerWidth, screen.width, screen.height);   // screen size covers maximising and turning a phone
+    var tall = Math.max(innerHeight, screen.width, screen.height);
+    var cols = Math.max(SPRITE_COLS, Math.ceil(wide / WALL.tile));
+    // as many rows as the covers fill (each cover once), but never fewer than the screen needs
+    var rows = Math.max(Math.ceil(tall / WALL.tile) + 1, Math.floor(files.length / cols));
+
+    // shuffle (Fisher-Yates) every cover once, then deal them into the cells;
+    // only a gigantic screen (more cells than covers) sees a cover twice
+    var deck = files.slice();
+    for (var i = deck.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1)), t = deck[i]; deck[i] = deck[j]; deck[j] = t;
     }
-    WALL.cells = cells;
+    var cells = [];
+    for (var k = 0; k < cols * rows; k++) cells.push(deck[k % deck.length]);
+    WALL.cols = cols; WALL.rows = rows; WALL.cells = cells;
 
     var pic = new Image(), canvas, ctx, px, url = null;
     function tile(f, k) {                     // copy cover f from wall.jpg into cell k of the canvas
       var s = at[f];
-      ctx.drawImage(pic, (s % WALL.cols) * px, Math.floor(s / WALL.cols) * px, px, px,
+      ctx.drawImage(pic, (s % SPRITE_COLS) * px, Math.floor(s / SPRITE_COLS) * px, px, px,
                     (k % WALL.cols) * px, Math.floor(k / WALL.cols) * px, px, px);
     }
     function publish(done) {                  // the canvas becomes the wall's background
@@ -403,16 +416,18 @@
       }, "image/jpeg", 0.9);
     }
     function fallback() {                     // no canvas (very old browser): the plain wall
-      WALL.cells = sprite;
+      WALL.cells = sprite; WALL.cols = SPRITE_COLS; WALL.rows = SPRITE_ROWS;
+      wall.style.backgroundSize = "";          // back to the 15-column CSS size
       wall.style.backgroundImage = 'url("images/wall.jpg")';
       wall.classList.add("ready");
     }
 
     pic.onload = function () {
       try {
-        px = pic.naturalWidth / WALL.cols;
+        px = pic.naturalWidth / SPRITE_COLS;
         canvas = document.createElement("canvas");
-        canvas.width = pic.naturalWidth; canvas.height = WALL.rows * px;
+        canvas.width = WALL.cols * px; canvas.height = WALL.rows * px;
+        wall.style.backgroundSize = (WALL.cols * WALL.tile) + "px auto";   // CSS default is 15 columns
         ctx = canvas.getContext("2d");
         WALL.cells.forEach(tile);
         publish(startSwaps);
@@ -451,7 +466,7 @@
       // the new cover, alone, fades in over the old one
       var one = document.createElement("canvas"); one.width = one.height = px;
       var s = at[f];
-      one.getContext("2d").drawImage(pic, (s % WALL.cols) * px, Math.floor(s / WALL.cols) * px, px, px, 0, 0, px, px);
+      one.getContext("2d").drawImage(pic, (s % SPRITE_COLS) * px, Math.floor(s / SPRITE_COLS) * px, px, px, 0, 0, px, px);
       var cover = document.createElement("div");
       cover.className = "wall-swap";
       cover.style.left = pick.left + "px"; cover.style.top = pick.top + "px";
