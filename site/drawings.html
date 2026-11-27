@@ -18,13 +18,8 @@
       font-family: "EB Garamond", Garamond, Georgia, serif;
     }
 
-    /* the same wall of covers as the music page, but darker so the drawings come first */
-    .wall {
-      position: fixed; inset: 0; z-index: -2;
-      background: url("images/wall.jpg") 0 0 / calc(15 * 104px) auto repeat;
-      filter: saturate(0.7) brightness(0.42);
-    }
-    .veil { position: fixed; inset: 0; z-index: -1; background: rgba(6,18,45,0.35); }
+    /* v0.9.3: the original deep blue of the site, no cover wall on this page */
+    body { background: radial-gradient(ellipse 120% 70% at 50% 30%, #13306b 0%, #0b1d45 55%, #06122d 100%) fixed no-repeat; }
 
     /* header bar - same as index.html */
     .topbar {
@@ -121,9 +116,8 @@
   </style>
 </head>
 <body>
-  <div class="wall"></div><div class="veil"></div>
   <nav class="topbar">
-    <div class="version">v0.9.2<span>27 Nov 2026</span></div>
+    <div class="version">v0.9.3<span>27 Nov 2026</span></div>
     <a href="index.html">music</a>
     <a href="drawings.html" aria-current="page">drawings</a>
     <a href="#">laziness</a>
@@ -144,6 +138,19 @@
      here: ["file.jpg", "caption"]. They show in this order, newest first if you
      put new ones at the top. */
   var DRAWINGS = [
+    ["drawing-figures-with-words.jpg",     "Figures, with words"],
+    ["drawing-house-by-the-rails.jpg",     "House by the railway"],
+    ["drawing-colour-group-lettering.jpg", "Group in the green, with lettering"],
+    ["drawing-bottle-and-glass.jpg",       "Bottle and glass"],
+    ["drawing-abstract-dark-gold.jpg",     "Dark and gold"],
+    ["drawing-sailor-cap.jpg",             "Sailor in a cap"],
+    ["drawing-long-hair-bowed.jpg",   "Long hair, head bowed"],
+    ["drawing-woman-with-guitar.jpg", "Woman with a guitar"],
+    ["drawing-omega.jpg",             "Omega"],
+    ["drawing-hat-and-round-eyes.jpg","Hat and round eyes"],
+    ["drawing-figure-on-hill.jpg",    "Figure on a hill"],
+    ["drawing-colour-figures.jpg",    "Figures in colour"],
+    ["drawing-man-with-glasses.jpg",  "Man with glasses"],
     ["drawing-house-at-night.jpg",    "House at night"],
     ["drawing-two-benches.jpg",       "Two benches in the park"],
     ["drawing-bearded-face-words.jpg","Bearded face, with words"],
