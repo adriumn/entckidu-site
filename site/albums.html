@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>eNTckidu · albums</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b1d45'/%3E%3Ctext x='32' y='49' text-anchor='middle' font-family='Cormorant Garamond,Garamond,Georgia,serif' font-weight='700' font-size='70' fill='%23efe7d4'%3Ee%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;800&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { background: #06122d; }
+    body {
+      min-height: 100vh;
+      padding: calc(3.2rem + 4vh) 5vw 8vh;      /* room for the header bar */
+      color: #efe7d4; text-align: center;
+      font-family: "EB Garamond", Garamond, Georgia, serif;
+    }
+
+    /* the albums list - same deep blue as the drawings page */
+    body { background: radial-gradient(ellipse 120% 70% at 50% 30%, #13306b 0%, #0b1d45 55%, #06122d 100%) fixed no-repeat; }
+
+    /* header bar - same as index.html */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 5;
+      height: 3.2rem; display: flex; align-items: center; justify-content: center;
+      gap: clamp(0.3rem, 2vw, 1.5rem);
+      background: #000; border-bottom: 2px solid #5fb36a;
+    }
+    .topbar a {
+      font-family: "EB Garamond", Garamond, serif; font-size: 1.4rem; font-weight: 500; letter-spacing: 0.07em;
+      color: #e6dcc4; text-decoration: none;
+      /* v0.9.2: each link is a full-height box; the page you are on gets a green box */
+      align-self: stretch; display: flex; align-items: center; padding: 0 clamp(0.8rem, 2.4vw, 1.6rem);
+      transition: background 0.2s, color 0.2s;
+    }
+    .topbar a:hover { background: #1c2a1e; color: #fff; }
+    .topbar a[aria-current="page"] { background: #5fb36a; color: #07140a; }
+    .version {
+      position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%);
+      font-family: "Cinzel", serif; font-size: 0.95rem; font-weight: 600; letter-spacing: 0.12em; color: #6fc47a;
+    }
+    .version span {
+      margin-left: 0.6rem; font-family: "EB Garamond", serif; font-weight: 400; font-size: 1rem;
+      letter-spacing: 0.04em; color: rgba(239,231,212,0.75);
+    }
+
+    .tools { max-width: 1200px; margin: 0 auto 3vh; display: flex; flex-wrap: wrap; gap: 0.8rem 1.6rem;
+      align-items: baseline; justify-content: center; }
+    .tools input {
+      width: min(22rem, 80vw); padding: 0.45rem 0.9rem; border-radius: 2rem;
+      border: 1px solid rgba(239,231,212,0.35); background: rgba(6,18,45,0.6); color: #efe7d4;
+      font-family: "EB Garamond", serif; font-size: 1.15rem; outline: none;
+    }
+    .tools input:focus { border-color: #5fb36a; }
+    .tools input::placeholder { color: rgba(239,231,212,0.5); }
+    .count { font-size: 1.1rem; color: #bfe0f8; }
+    .count small { margin-left: 0.5rem; font-size: 0.9rem; color: rgba(239,231,212,0.55); }
+
+    /* the list: artists in columns, their albums under them */
+    .list { max-width: 1200px; margin: 0 auto; columns: 3 18rem; column-gap: 3rem; text-align: left; }
+    .artist { break-inside: avoid; margin-bottom: 1.1rem; }
+    .artist h2 {
+      font-family: "Cinzel", serif; font-weight: 600; font-size: 1.02rem; letter-spacing: 0.06em;
+      color: #efe7d4; border-bottom: 1px solid rgba(95,179,106,0.45); padding-bottom: 0.15rem; margin-bottom: 0.2rem;
+    }
+    .artist li { list-style: none; font-size: 1.08rem; line-height: 1.35; color: #d8d0bd; padding-left: 0.6rem; }
+    .letter {
+      font-family: "Cinzel", serif; font-size: 1.6rem; color: #6fc47a; margin: 0.4rem 0 0.4rem;
+      break-after: avoid;
+    }
+    .empty { margin-top: 4vh; font-size: 1.2rem; color: rgba(239,231,212,0.6); }
+
+    @media (max-width: 600px) {
+      .version { display: none; }
+      .list { columns: 1; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="topbar">
+    <div class="version">v0.9.7<span>27 Nov 2026</span></div>
+    <a href="index.html" aria-current="page">music</a>
+    <a href="drawings.html">drawings</a>
+    <a href="#">laziness</a>
+  </nav>
+
+  <div class="tools">
+    <input type="search" placeholder="search artist or album" aria-label="Search albums">
+    <span class="count">waking up the record shelf…</span>
+  </div>
+  <div class="list"></div>
+
+  <script>
+  /* The albums come from the Azure SQL database through /api/albums.
+     If the database is asleep (or paused for the month), the page shows the saved copy
+     data/albums.json, made by tools/make-albums.py. */
+  (function () {
+    var list = document.querySelector(".list");
+    var count = document.querySelector(".count");
+    var search = document.querySelector(".tools input");
+    var albums = [], source = "";
+
+    function getJson(url, ms) {
+      var ctl = window.AbortController ? new AbortController() : null;
+      var t = ctl && setTimeout(function () { ctl.abort(); }, ms);
+      return fetch(url, ctl ? { signal: ctl.signal } : {}).then(function (r) {
+        clearTimeout(t);
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+      });
+    }
+
+    function sortKey(s) { return s.replace(/^the /i, "").toLowerCase(); }
+    function firstLetter(s) {
+      var c = sortKey(s).normalize("NFD").charAt(0).toUpperCase();
+      return /[A-Z]/.test(c) ? c : "#";
+    }
+    function el(tag, cls, text) {
+      var e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text != null) e.textContent = text;
+      return e;
+    }
+
+    function show() {
+      var q = search.value.trim().toLowerCase();
+      var shown = albums.filter(function (a) {
+        return !q || (a.artist + " " + a.album).toLowerCase().indexOf(q) >= 0;
+      });
+      var byArtist = {}, artists = [];
+      shown.forEach(function (a) {
+        if (!byArtist[a.artist]) { byArtist[a.artist] = []; artists.push(a.artist); }
+        byArtist[a.artist].push(a.album);
+      });
+      artists.sort(function (x, y) { return sortKey(x).localeCompare(sortKey(y)); });
+
+      list.textContent = "";
+      var letter = "";
+      artists.forEach(function (name) {
+        var l = firstLetter(name);
+        if (l !== letter && !q) { letter = l; list.appendChild(el("div", "letter", l)); }
+        var box = el("section", "artist");
+        box.appendChild(el("h2", "", name));
+        var ul = el("ul");
+        byArtist[name].sort(function (x, y) { return x.localeCompare(y); })
+          .forEach(function (al) { ul.appendChild(el("li", "", al)); });
+        box.appendChild(ul);
+        list.appendChild(box);
+      });
+      if (!shown.length) list.appendChild(el("p", "empty", "nothing on the shelf matches that"));
+
+      count.textContent = (q ? shown.length + " of " : "") + albums.length + " albums · " + artists.length + (artists.length === 1 ? " artist" : " artists");
+      count.appendChild(el("small", "", source));
+    }
+
+    function load(data, from) {
+      albums = data.map(function (a) { return { artist: a.artist, album: a.album }; });
+      source = from;
+      show();
+    }
+
+    getJson("api/albums", 25000)
+      .then(function (d) { load(d, "live from the database"); })
+      .catch(function () {
+        getJson("data/albums.json", 10000)
+          .then(function (d) { load(d, "saved copy"); })
+          .catch(function () { count.textContent = "the shelf could not be loaded"; });
+      });
+
+    search.addEventListener("input", show);
+  })();
+  </script>
+</body>
+</html>
