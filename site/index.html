@@ -58,15 +58,18 @@
     .topbar {
       position: fixed; top: 0; left: 0; right: 0; z-index: 5;
       height: 3.2rem; display: flex; align-items: center; justify-content: center;
-      gap: clamp(1.5rem, 5vw, 4rem);
+      gap: clamp(0.3rem, 2vw, 1.5rem);
       background: #000; border-bottom: 2px solid #5fb36a;      /* thin green line */
     }
     .topbar a {
       font-family: "EB Garamond", Garamond, serif; font-size: 1.4rem; font-weight: 500; letter-spacing: 0.07em;
-      color: #e6dcc4; text-decoration: none; padding: 0.2rem 0.1rem;
+      color: #e6dcc4; text-decoration: none;
+      /* v0.9.2: each link is a full-height box; the page you are on gets a green box */
+      align-self: stretch; display: flex; align-items: center; padding: 0 clamp(0.8rem, 2.4vw, 1.6rem);
+      transition: background 0.2s, color 0.2s;
     }
-    .topbar a:hover, .topbar a[aria-current="page"] { color: #fff; }
-    .topbar a[aria-current="page"] { border-bottom: 2px solid #5fb36a; }
+    .topbar a:hover { background: #1c2a1e; color: #fff; }
+    .topbar a[aria-current="page"] { background: #5fb36a; color: #07140a; }
     .version {
       position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%);
       font-family: "Cinzel", serif; font-size: 0.95rem; font-weight: 600; letter-spacing: 0.12em; color: #6fc47a;
@@ -328,7 +331,7 @@
 <body>
   <div class="wall"></div><div class="veil"></div>
   <nav class="topbar">
-    <div class="version">v0.9.1<span>27 Nov 2026</span></div>
+    <div class="version">v0.9.2<span>27 Nov 2026</span></div>
     <a href="index.html" aria-current="page">music</a>
     <a href="drawings.html">drawings</a>
     <a href="#">laziness</a>
