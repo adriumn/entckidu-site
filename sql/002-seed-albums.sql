@@ -1,4 +1,4 @@
--- 002: fill Albums from the captions on the music page (389 albums, doubles merged).
+-- 002: fill Albums from the captions on the music page (407 albums, doubles merged).
 -- Made by tools/make-albums.py. Safe to run again: albums already in the table are skipped.
 
 INSERT INTO dbo.Albums (Artist, Album)
@@ -15,6 +15,7 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'Air', N'Talkie Walkie'),
     (N'Al Di Meola', N'Elegant Gypsy'),
     (N'Alameda', N'Alameda'),
+    (N'Alexandru Andrieș', N'Rock''n''roll'),
     (N'Alquin', N'3 Originals'),
     (N'Alquin', N'Marks'),
     (N'Altın Gün', N'On'),
@@ -75,6 +76,9 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'COS', N'Postaeolian Train Robbery'),
     (N'Coverdale · Page', N'Coverdale · Page'),
     (N'Cravinkel', N'Cravinkel'),
+    (N'Czerwone Gitary', N'Na fujarce'),
+    (N'Czesław Niemen', N'Enigmatic'),
+    (N'Czesław Niemen', N'Idée Fixe'),
     (N'Daevid Allen', N'Now Is the Happiest Time of Your Life'),
     (N'Darryl Way''s Wolf', N'Canis Lupus'),
     (N'Darryl Way''s Wolf', N'Night Music'),
@@ -148,16 +152,16 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'Guru Guru', N'Hinten'),
     (N'Guru Guru', N'Tango Fango'),
     (N'Guru Guru', N'This Is Guru Guru'),
-    (N'Guru Guru', N'UFO'),
-    (N'Harvey Mandel', N'The Snake'),
-    (N'Hatfield and the North', N'Hatfield and the North'),
-    (N'Hatfield and the North', N'The Rotters'' Club'),
-    (N'Hawkwind', N'Masters of the Universe')
+    (N'Guru Guru', N'UFO')
 ) AS v(Artist, Album)
 WHERE NOT EXISTS (SELECT 1 FROM dbo.Albums a WHERE a.Artist = v.Artist AND a.Album = v.Album);
 
 INSERT INTO dbo.Albums (Artist, Album)
 SELECT v.Artist, v.Album FROM (VALUES
+    (N'Harvey Mandel', N'The Snake'),
+    (N'Hatfield and the North', N'Hatfield and the North'),
+    (N'Hatfield and the North', N'The Rotters'' Club'),
+    (N'Hawkwind', N'Masters of the Universe'),
     (N'Henry Cow', N'In Praise of Learning'),
     (N'Henry Cow', N'Legend'),
     (N'Holger Czukay, Jah Wobble, Jaki Liebezeit', N'Full Circle'),
@@ -255,10 +259,13 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'Nektar', N'Remember the Future'),
     (N'Neu!', N'Neu!'),
     (N'Nicu Alifantis', N'După melci'),
+    (N'Niemen', N'Niemen'),
+    (N'Niemen i Akwarele', N'Sukces'),
     (N'Novalis', N'Brandung'),
     (N'Novalis', N'Novalis'),
     (N'Nucleus', N'Elastic Rock'),
     (N'October', N'After the Fall'),
+    (N'Olympic', N'V Lucerně'),
     (N'Omega', N'Omega'),
     (N'Opus', N'Live Is Life'),
     (N'Opus Avantra', N'Lord Cromwell Plays Suite for Seven Vices'),
@@ -289,6 +296,7 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'Peter Hammill', N'Singularity'),
     (N'Phil Manzanera', N'Diamond Head'),
     (N'Phil Manzanera', N'Vozero'),
+    (N'Philip Lynott', N'Solo in Soho'),
     (N'Philip Lynott', N'The Philip Lynott Album'),
     (N'Phoenix', N'Transsylvania'),
     (N'Pierre Moerlen''s Gong', N'Downwind'),
@@ -299,7 +307,12 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'Potemkine', N'Triton'),
     (N'Pró Musica', N'Pró Musica'),
     (N'Queen', N'Live in Vienna, Austria, July 21, 1986'),
-    (N'Quicksand', N'Home Is Where I Belong'),
+    (N'Quicksand', N'Home Is Where I Belong')
+) AS v(Artist, Album)
+WHERE NOT EXISTS (SELECT 1 FROM dbo.Albums a WHERE a.Artist = v.Artist AND a.Album = v.Album);
+
+INSERT INTO dbo.Albums (Artist, Album)
+SELECT v.Artist, v.Album FROM (VALUES
     (N'Rainbow', N'Rising'),
     (N'Return to Forever', N'Romantic Warrior'),
     (N'Rezident EX', N'Alpha'),
@@ -307,12 +320,7 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'Robert Fripp', N'Let the Power Fall'),
     (N'Roger Waters', N'The Pros and Cons of Hitch Hiking'),
     (N'Roy Harper', N'Valentine'),
-    (N'Roy Harper & Jimmy Page', N'Whatever Happened to Jugula?')
-) AS v(Artist, Album)
-WHERE NOT EXISTS (SELECT 1 FROM dbo.Albums a WHERE a.Artist = v.Artist AND a.Album = v.Album);
-
-INSERT INTO dbo.Albums (Artist, Album)
-SELECT v.Artist, v.Album FROM (VALUES
+    (N'Roy Harper & Jimmy Page', N'Whatever Happened to Jugula?'),
     (N'Rush', N'2112'),
     (N'Rush', N'Caress of Steel'),
     (N'Rush', N'Roll the Bones'),
@@ -325,6 +333,9 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'Shadowfax', N'Watercourse Way'),
     (N'Shakti with John McLaughlin', N'Shakti'),
     (N'Slowdive', N'Souvlaki'),
+    (N'Smak', N'Crna dama'),
+    (N'Smak', N'Smak'),
+    (N'Smak', N'Zašto ne volim sneg'),
     (N'Soft Heap', N'Soft Heap'),
     (N'Soft Machine', N'5'),
     (N'Soft Machine', N'Seven'),
@@ -365,12 +376,19 @@ SELECT v.Artist, v.Album FROM (VALUES
     (N'The Who', N'Who Are You'),
     (N'The Wilde Flowers', N'The Wilde Flowers'),
     (N'The Zawinul Syndicate / Jaco Pastorius', N'The Immigrants / A Good Stitch for Golden Roads'),
+    (N'Thin Lizzy', N'Bad Reputation'),
     (N'Thin Lizzy', N'Black Rose'),
     (N'Thin Lizzy', N'Chinatown'),
     (N'Thin Lizzy', N'Fighting'),
+    (N'Thin Lizzy', N'Jailbreak'),
+    (N'Thin Lizzy', N'Johnny the Fox'),
     (N'Thin Lizzy', N'Live and Dangerous at Hammersmith 16 Nov 1976'),
+    (N'Thin Lizzy', N'Millennium Edition'),
     (N'Thin Lizzy', N'Nightlife'),
+    (N'Thin Lizzy', N'Renegade'),
     (N'Thin Lizzy', N'Shades of a Blue Orphanage'),
+    (N'Thin Lizzy', N'Thunder and Lightning'),
+    (N'Thin Lizzy', N'Vagabonds of the Western World'),
     (N'Third Ear Band', N'The Magus'),
     (N'Thirsty Moon', N'Thirsty Moon'),
     (N'Tim Blake', N'Crystal Machine'),
