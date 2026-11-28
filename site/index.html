@@ -169,6 +169,9 @@
       text-shadow: 0 2px 14px rgba(0,0,0,0.9), 0 0 2px rgba(0,0,0,0.7);
     }
     .tagline-under:empty { display: none; }
+    /* v0.9.12: the tagline rotates through several lines; each change fades out, then in */
+    .tagline-under { transition: opacity 0.9s ease; }
+    .tagline-under.fading { opacity: 0; }
 
     /* Line 2: one line, classical Garamond, sized to always fit the width */
     .tagline {
@@ -487,9 +490,34 @@
      Put a file name from the list below, or "" to pick one at random. */
   var FEATURED = "";
 
-  /* TAGLINE: one small line of text under the name. Leave it "" to show nothing. */
-  var TAGLINE = "who you jivin' with that cosmic debris?";
-  document.querySelector(".tagline-under").textContent = TAGLINE;
+  /* TAGLINES: the small lines of text under the name live in data/taglines.txt,
+     one line per line (blank lines are skipped). One is picked at random on each
+     visit, then they take turns every TAGLINE_EVERY seconds. One line = it just
+     stays. Empty or missing file = nothing is shown. */
+  var TAGLINE_EVERY = 12;   // seconds each line stays; 0 = never change
+  (function () {
+    var el = document.querySelector(".tagline-under");
+    fetch("data/taglines.txt", { cache: "no-cache" })
+      .then(function (r) { return r.ok ? r.text() : ""; })
+      .catch(function () { return ""; })
+      .then(function (text) {
+        var lines = text.split(/\r?\n/).map(function (t) { return t.trim(); }).filter(Boolean);
+        if (!lines.length) return;
+        var i = Math.floor(Math.random() * lines.length);
+        el.textContent = lines[i];
+        var still = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (lines.length < 2 || !TAGLINE_EVERY || still) return;
+        setInterval(function () {
+          if (document.hidden) return;       // don't change lines in a background tab
+          el.classList.add("fading");
+          setTimeout(function () {
+            i = (i + 1) % lines.length;
+            el.textContent = lines[i];
+            el.classList.remove("fading");
+          }, 900);                           // = the fade time in the CSS
+        }, TAGLINE_EVERY * 1000);
+      });
+  })();
 
   /* The records list. To add a record: put its photo in images/records/,
      add a line below, then rebuild the wall: python tools/make-wall.py
